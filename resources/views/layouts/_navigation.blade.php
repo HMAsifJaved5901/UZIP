@@ -98,3 +98,58 @@
         </div>
     </div>
 </nav>
+
+{{--<li class="menu-item {{ Request::is('configuration/wages') ? 'active' : '' }}">--}}
+{{--<a href="{{ route('configuration.index', ['type' => 'wages']) }}" class="menu-link">--}}
+{{--<i class="menu-icon tf-icons fa fa-database"></i>--}}
+{{--<div data-i18n="Wages Setting">Wages Setting</div>--}}
+{{--</a>--}}
+{{--</li>--}}
+{{--<li class="menu-item {{ Request::is('configuration/commission') ? 'active' : '' }}">--}}
+{{--<a href="{{ route('configuration.index', ['type' => 'commission']) }}" class="menu-link">--}}
+{{--<i class="menu-icon tf-icons fa fa-database"></i>--}}
+{{--<div data-i18n="Commission Setting">Commission Setting</div>--}}
+{{--</a>--}}
+{{--</li>--}}
+{{--<li class="menu-item {{ Request::is('configuration/discount') ? 'active' : '' }}">--}}
+{{--<a href="{{ route('configuration.index', ['type' => 'discount']) }}" class="menu-link">--}}
+{{--<i class="menu-icon tf-icons fa fa-database"></i>--}}
+{{--<div data-i18n="Discount Setting">Discount Setting</div>--}}
+{{--</a>--}}
+{{--</li>--}}
+
+{{--<li class="menu-item {{ Request::is('income*') ? 'active' : '' }}">--}}
+    {{--<a href="{{ route('income.index') }}" class="menu-link">--}}
+        {{--<img class="menu-icon tf-icons" src="{{ asset('lib/assets/img/navicons/Income.png') }}">--}}
+        {{--<i class="menu-icon tf-icons fa fa-money-bill"></i>--}}
+        {{--<div data-i18n="Income" class="text-white">Income</div>--}}
+    {{--</a>--}}
+{{--</li>--}}
+
+
+{{--<li class="menu-item {{ Request::is('lotto*') ? 'open' : ''}}">--}}
+    {{--<a href="javascript:void(0);" class="menu-link menu-toggle">--}}
+        {{--<img class="menu-icon tf-icons" src="{{ asset('lib/assets/img/navicons/payroll.png') }}">--}}
+        {{--<div data-i18n="Lotto" class="text-white">Lotto</div>--}}
+    {{--</a>--}}
+    {{--<ul class="menu-sub">--}}
+        {{--<li class="menu-item {{ Request::is('lotto/dc*') ? 'active' : '' }}">--}}
+            {{--<a href="{{ route('web.lotto.dc.index') }}" class="menu-link">--}}
+                {{--<i class="menu-icon tf-icons fas fa-receipt text-white"></i>--}}
+                {{--<div data-i18n="DC Lotto Online" class="text-white">DC Lotto Online</div>--}}
+            {{--</a>--}}
+        {{--</li>--}}
+        {{--<li class="menu-item {{ Request::is('lotto/pat*') ? 'active' : '' }}">--}}
+            {{--<a href="{{ route('web.lotto.pat.index') }}" class="menu-link">--}}
+                {{--<i class="menu-icon tf-icons fas fa-receipt text-white"></i>--}}
+                {{--<div data-i18n="PAT Machine" class="text-white">PAT Machine</div>--}}
+            {{--</a>--}}
+        {{--</li>--}}
+        {{--<li class="menu-item {{ Request::is('lotto/bet/mac*') ? 'active' : '' }}">--}}
+            {{--<a href="{{ route('web.lotto.bet.mac.index') }}" class="menu-link">--}}
+                {{--<i class="menu-icon tf-icons fas fa-receipt text-white"></i>--}}
+                {{--<div data-i18n="Gaming Bet machine" class="text-white">Gaming Bet machine</div>--}}
+            {{--</a>--}}
+        {{--</li>--}}
+    {{--</ul>--}}
+{{--</li>--}}

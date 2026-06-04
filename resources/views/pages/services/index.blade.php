@@ -9,13 +9,13 @@
                 </div>
             </div>
             <div class="card-datatable table-responsive">
-                <table class="datatables-service table border-top">
-                    <thead>
+                <table class="datatables-service table border-top  custom-table-design">
+                    <thead class="bg-custom-black">
                     <tr>
                         <th></th>
                         <th>Name</th>
+                        {{--<th>Code</th>--}}
                         <th>Description</th>
-                        <th>Category</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -24,7 +24,8 @@
             </div>
             <!-- Offcanvas to add new service -->
             <div
-                    class="offcanvas offcanvas-end"
+                    {{--class="offcanvas offcanvas-end"--}}
+                    class="offcanvas custom-centered-modal"
                     tabindex="-1"
                     id="offcanvasAddService"
                     aria-labelledby="offcanvasAddServiceLabel"
@@ -43,6 +44,7 @@
                           action="{{ route('service.save') }}" method="POST">
                         @csrf
                         <input type="hidden" value="" name="id" id="service_id">
+                        <input type="hidden" value="" name="category_id" id="add-service-category">
                         <div class="mb-3">
                             <label class="form-label" for="add-service-name">Service Name</label>
                             <input
@@ -64,15 +66,6 @@
                                     name="description"
                                     aria-label="Tesla description"
                             />
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label" for="add-service-category">Service Category</label>
-                            <select id="add-service-category" class="form-select" name="category_id">
-                                <option value="">Select Category</option>
-                                @foreach($categories as $category)
-                                    <option value="{{$category->id}}">{{$category->name}}</option>
-                                @endforeach
-                            </select>
                         </div>
                         <button type="submit" class="btn btn-primary me-sm-3 me-1 data-submit">Submit</button>
                         <button type="reset" class="btn btn-label-secondary" data-bs-dismiss="offcanvas">Cancel</button>
@@ -140,10 +133,10 @@
                 const action = $(this).data('action_type');
 
                 var btnTitle = (action === 'restore') ? "Sure to Proceed?" : "Are you sure?";
-                var btnText = (action === 'restore') ? "Please proceed to restore deleted data!" : "This Service won't be able to perform any action!";
-                var confirmBtnText = (action === 'restore') ? "Yes, restore it!" : "Yes, delete it!";
-                var SuccessTitle = (action === 'restore') ? "Restore!" : "Deleted!";
-                var SuccessText = (action === 'restore') ? "The Service has been restored.!" : "The Service has been deleted!";
+                var btnText = (action === 'restore') ? "Please proceed to Activate Suspended data!" : "This Service won't be able to perform any action!";
+                var confirmBtnText = (action === 'restore') ? "Yes, Activate it!" : "Yes, Suspend it!";
+                var SuccessTitle = (action === 'restore') ? "Activate!" : "Suspended!";
+                var SuccessText = (action === 'restore') ? "The Service has been Activated.!" : "The Service has been Suspended!";
 
                 Swal.fire({
                     title: btnTitle,

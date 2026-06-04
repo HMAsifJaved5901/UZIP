@@ -51,40 +51,61 @@
     <link rel="stylesheet" href="{{ asset('lib/assets/vendor/css/pages/page-auth.css') }}"/>
     <!-- Helpers -->
     <script src="{{ asset('lib/assets/vendor/js/helpers.js') }} "></script>
+    {{ $links ?? '' }}
 
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="{{ asset('lib/assets/js/config.js') }} "></script>
+    <style>
+        .authentication-wrapper.authentication-cover .authentication-inner .auth-cover-bg {
+            background-color: #1d232a !important;
+        }
+        .authentication-wrapper.authentication-basic .authentication-inner::before{
+                display: none;
+            }
+            .authentication-wrapper.authentication-basic .authentication-inner::after{
+                display: none;
+            }
+            .form-group .form-label{
+                position: absolute;
+                left: 15px;
+                top: 7px;
+                z-index: 9;
+            }
+            .form-control{
+                height: 60px;
+                padding-top: 27px;
+            }
+
+    </style>
     <!-- Scripts
     @vite(['resources/css/app.css', 'resources/js/app.js']) -->
 </head>
 <body class="font-sans antialiased">
-<div class="authentication-wrapper authentication-cover authentication-bg">
-    <div class="authentication-inner row">
-        <!-- /Left Text -->
-        <div class="d-none d-lg-flex col-lg-7 p-0">
-            <div class="auth-cover-bg auth-cover-bg-color d-flex justify-content-center align-items-center">
-                <img
-                        src="{{ asset('lib/assets/img/illustrations/auth-login-illustration-light.png') }} "
-                        alt="auth-login-cover"
-                        class="img-fluid my-5 auth-illustration"
-                        data-app-light-img="illustrations/auth-login-illustration-light.png"
-                        data-app-dark-img="illustrations/auth-login-illustration-dark.png"
-                />
+    <div class="authentication-wrapper authentication-basic container-p-y">
+        <div class="authentication-inner py-4" style="max-width: 500px;">
+          <!-- Login -->
+          <div class="card" style="border-radius: 15px;">
+            <div class="card-body">
+              <!-- Logo -->
+              <div class="app-brand justify-content-center mb-4 mt-2">
+                <a href="#" class="app-brand-link gap-2">
+                  <span class="app-brand-logo demo" style="width: 240px;
+  height: auto;">
+                    <img src="{{ asset('lib/assets/img/auth-login-illustration-dark.png') }}" class="w-100" />
+                  </span>
+                  <!--<span class="app-brand-text demo text-body fw-bold ms-1">Vuexy</span>-->
+                </a>
+              </div>
+              <!-- /Logo -->
+              {{ $slot }}
 
-                <img
-                        src="{{ asset('lib/assets/img/illustrations/bg-shape-image-light.png') }} "
-                        alt="auth-login-cover"
-                        class="platform-bg"
-                        data-app-light-img="illustrations/bg-shape-image-light.png"
-                        data-app-dark-img="illustrations/bg-shape-image-dark.png"
-                />
             </div>
+          </div>
+          <!-- /Register -->
         </div>
-        {{ $slot }}
-    </div>
+      </div>
 
-</div>
 <!-- Core JS -->
 <!-- build:js assets/vendor/js/core.js -->
 <script src="{{ asset('lib/assets/vendor/libs/jquery/jquery.js') }} "></script>

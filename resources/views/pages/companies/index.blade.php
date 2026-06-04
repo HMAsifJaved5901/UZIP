@@ -9,15 +9,14 @@
                 </div>
             </div>
             <div class="card-datatable table-responsive">
-                <table class="datatables-company table border-top">
-                    <thead>
+                <table class="datatables-company table border-top custom-table-design">
+                    <thead class="bg-custom-black">
                     <tr>
                         <th></th>
-                        <th>Company Name</th>
-                        <th>Parent Company</th>
-                        <th>Company Code</th>
-                        <th>Company Address</th>
-                        <th>Company Logo</th>
+                        <th >Company Name</th>
+                        {{--<th>Business Name</th>--}}
+                        {{--<th>Company Code</th>--}}
+                        {{--<th>Company Address</th>--}}
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -26,7 +25,8 @@
             </div>
             <!-- Offcanvas to add new company -->
             <div
-                    class="offcanvas offcanvas-end"
+                    {{--class="offcanvas offcanvas-end custom-centered-modal"--}}
+                    class="offcanvas custom-centered-modal"
                     tabindex="-1"
                     id="offcanvasAddCompany"
                     aria-labelledby="offcanvasAddCompanyLabel"
@@ -51,26 +51,27 @@
                                     type="text"
                                     class="form-control"
                                     id="add-company-name"
-                                    placeholder="Tesla"
+                                    placeholder="Name"
                                     name="company_name"
-                                    aria-label="Tesla"
+                                    aria-label="Name"
                             />
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-3" style="display: none">
                             <div class="mb-4">
-                                <label class="form-label" for="add-station-parent-company">Parent Company</label>
-                                <select id="add-station-parent-company" class="form-select" name="company_id">
-                                    <option value="0">Select Parent Company</option>
-                                    @foreach($companies as $company)
-                                        <option value="{{$company->id}}">{{$company->company_name}}</option>
-                                    @endforeach
-                                </select>
+                                <label class="form-label" for="add-station-parent-company">Business</label>
+                                <input id="add-station-parent-company" name="business_id" value="1" type="hidden">
+                                {{--<select id="add-station-parent-company" class="form-select" name="business_id">--}}
+                                    {{--@foreach($companies as $company)--}}
+                                        {{--<option value="{{$company->id}}">{{$company->name}}</option>--}}
+                                    {{--@endforeach--}}
+                                {{--</select>--}}
                             </div>
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-3" style="display: none">
                             <label class="form-label" for="add-company-address">Company Address</label>
                             <input
-                                    type="text"
+                                    type="hidden"
+                                    value="ABC"
                                     id="add-company-address"
                                     class="form-control"
                                     placeholder="abc street"
@@ -79,10 +80,11 @@
                                     autocomplete="off"
                             />
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-3" style="display: none">
                             <label class="form-label" for="add-company-code">Company Code </label>
                             <input
-                                    type="text"
+                                    type="hidden"
+                                    value="ABC123"
                                     id="add-company-code"
                                     class="form-control"
                                     placeholder="123QWE"
@@ -91,7 +93,7 @@
                                     autocomplete="off"
                             />
                         </div>
-                        <div class="mb-4">
+                        <div class="mb-4" style="display: none">
                             <label class="form-label" for="add-company-logo">Company Logo</label>
                             <input
                                     type="file"
@@ -146,9 +148,7 @@
                                 var company = response.data;
                                 // Populate the form fields
                                 $('#company_id').val(company.id);
-                                if(company.id !== company.parent_id){
-                                    $('#add-station-parent-company').val(company.parent_id).change();
-                                }
+                                $('#add-station-parent-company').val(company.business_id).change();
                                 $('#add-company-name').val(company.company_name);
                                 $('#add-company-address').val(company.company_address);
                                 $('#add-company-code').val(company.company_code );
@@ -173,10 +173,10 @@
                 const action = $(this).data('action_type');
 
                 var btnTitle = (action === 'restore') ? "Sure to Proceed?" : "Are you sure?";
-                var btnText = (action === 'restore') ? "Please proceed to restore deleted data!" : "This Company won't be able to perform any action!";
-                var confirmBtnText = (action === 'restore') ? "Yes, restore it!" : "Yes, delete it!";
-                var SuccessTitle = (action === 'restore') ? "Restore!" : "Deleted!";
-                var SuccessText = (action === 'restore') ? "The Role has been restored.!" : "The Role has been deleted!";
+                var btnText = (action === 'restore') ? "Please proceed to Activate Suspended data!" : "This Company won't be able to perform any action!";
+                var confirmBtnText = (action === 'restore') ? "Yes, Activate it!" : "Yes, Suspend it!";
+                var SuccessTitle = (action === 'restore') ? "Activate!" : "Suspended!";
+                var SuccessText = (action === 'restore') ? "The Company has been Activated.!" : "The Company has been Suspended!";
 
                 Swal.fire({
                     title: btnTitle,

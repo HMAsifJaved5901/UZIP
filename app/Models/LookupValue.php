@@ -3,6 +3,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 /**
+   @property varchar $reference_type reference type
+   @property int $reference_value reference value
    @property varchar $type type
 @property varchar $value value
 @property text $description description
@@ -21,7 +23,10 @@ class LookupValue extends Model
     /**
     * Mass assignable columns
     */
-    protected $fillable=['type',
+    protected $fillable=[
+'reference_type',
+'reference_value',
+'type',
 'value',
 'description'];
 
@@ -31,6 +36,9 @@ class LookupValue extends Model
     protected $dates=[];
 
 
-
+    public function lookupVendor()
+    {
+        return $this->hasMany(VendorLookupValue::class, 'lookup_id', 'id');
+    }
 
 }

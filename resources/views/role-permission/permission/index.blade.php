@@ -11,7 +11,7 @@
     {{--</p>--}}
 
     <!-- Permission Table -->
-        <div class="card">
+        <div class="card rolePermission-page-main">
             <form id="insertRolePermission" class="row g-3" action="{{route('roles.permission')}}"
                   method="POST">
                 {{csrf_field()}}
@@ -26,49 +26,86 @@
                         </select>
                     </div>
                     <hr>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" name="selectAllPermission" type="checkbox"
-                               id="selectAllPermission"
-                               onclick="selectAll(this, 'permissions')">
-                        <label class="form-check-label" for="selectAllPermission">Select All Permissions</label>
+                    <!--<div class="form-check mb-2">-->
+                    <!--    <input class="form-check-input" name="selectAllPermission" type="checkbox"-->
+                    <!--           id="selectAllPermission"-->
+                    <!--           onclick="selectAll(this, 'permissions')">-->
+                    <!--    <label class="form-check-label" for="selectAllPermission">Select All Permissions</label>-->
+                    <!--</div>-->
+                    <div class="form-check form-switch ps-0">
+                        <label class="switch">
+                            <input type="checkbox" class="switch-input form-check-input" name="selectAllPermission" id="selectAllPermission" onclick="selectAll(this, 'permissions')" />
+                            
+                            <span class="switch-toggle-slider">
+                              <span class="switch-on">
+                                <!--<i class="ti ti-check"></i>-->
+                              </span>
+                              <span class="switch-off">
+                                <!--<i class="ti ti-x"></i>-->
+                              </span>
+                            </span>
+                            <p>Select All Permissions</p>
+                        </label>
                     </div>
                     @foreach ($data as $module => $permissions)
-                        <div class="mb-3" id="permissions-list">
+                        <div class="permissions-list-main row mx-0" id="permissions-list">
                             <h5>{{ $module }}</h5>
                             @foreach ($permissions as $key=>$permission)
-                                <div id="permissions{{$key}}" class="row permissions">
-                                    <div class="col-md-2">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="permission[]"
-                                                   id="{{$module}}.'_'.{{ $permission['guard_name'] }}"
-                                                   value="{{ $permission['id'] }}">
-                                            <label class="form-check-label"
-                                                   for="{{ $permission['guard_name'] }}">{{ $permission['name'] }}</label>
+                                <div id="permissions{{$key}}" class="col-md-3 permissions">
+                                    <div class="col-md-12">
+<!--                                        <div class="form-check">-->
+<!--                                            <input class="form-check-input" type="checkbox" name="permission[]"-->
+<!--                                                   id="{{$module}}.'_'.{{ $permission['guard_name'] }}"-->
+<!--                                                   value="{{ $permission['id'] }}">-->
+<!--                                            <label class="form-check-label"-->
+<!--                                                   for="{{ $permission['guard_name'] }}">-->
+<!--{{--                                                {{ ucwords(str_replace('-', ' ', last(explode('-', $permission['slug'])))) }}--}}-->
+<!--                                                {{ ucwords($permission['name']) }}-->
+<!--                                            </label>-->
+<!--                                        </div>-->
+                                        <div class="form-check form-switch ps-0">
+                                            <label class="switch">
+                                                <input type="checkbox" class="switch-input form-check-input" name="permission[]" id="{{$module}}.'_'.{{ $permission['guard_name'] }}" value="{{ $permission['id'] }}" />
+                                                
+                                                <span class="switch-toggle-slider">
+                                                  <span class="switch-on">
+                                                    <!--<i class="ti ti-check"></i>-->
+                                                  </span>
+                                                  <span class="switch-off">
+                                                    <!--<i class="ti ti-x"></i>-->
+                                                  </span>
+                                                </span>
+                                                <p>
+                                                    {{--                                                {{ ucwords(str_replace('-', ' ', last(explode('-', $permission['slug'])))) }}--}}
+                                                {{ ucwords($permission['name']) }}
+                                                </p>
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
+
                             @endforeach
                         </div>
-                        <hr>
+                        <!--<hr>-->
                     @endforeach
                 </div>
 
                 <div class="col-12 text-center mt-4 mb-4">
                     <button type="submit" class="btn btn-primary me-sm-3 me-1">Submit</button>
-                    <button
-                            type="reset"
-                            class="btn btn-label-secondary"
-                            data-bs-dismiss="modal"
-                            aria-label="Close"
-                    >
-                        Cancel
-                    </button>
+                    {{--<button--}}
+                            {{--type="reset"--}}
+                            {{--class="btn btn-label-secondary"--}}
+                            {{--data-bs-dismiss="modal"--}}
+                            {{--aria-label="Close"--}}
+                    {{-->--}}
+                        {{--Cancel--}}
+                    {{--</button>--}}
                 </div>
             </form>
 
             <div class="card-datatable table-responsive" style="display:none">
-                <table class="datatables-permissions table border-top">
-                    <thead>
+                <table class="datatables-permissions table border-top custom-table-design">
+                    <thead class="bg-custom-black">
                     <tr>
                         <th></th>
                         <th></th>

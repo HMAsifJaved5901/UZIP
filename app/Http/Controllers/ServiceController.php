@@ -41,17 +41,16 @@ class ServiceController extends Controller
             ]);
     }
 
-    public function serviceIndex(Index $request)
+
+    public function dataTableList(Index $request)
     {
-        $model = Service::join('categories', 'services.category_id', '=', 'categories.id')
-            ->select('services.*', 'categories.name as category_name')
-            ->get();
+        $model = Service::where('is_deleted',0)->get();
         $formattedModel = $model->map(function ($m) {
             return [
                 'id' => $m->id,
                 'name' => $m->name,
+                'code' => $m->scode,
                 'description' => $m->description,
-                'category_name' => $m->category_name,
                 'is_active' => $m->is_active,
                 'is_deleted' => $m->is_deleted,
                 'created_at' => $m->created_at
@@ -62,7 +61,7 @@ class ServiceController extends Controller
         return response()->json(['data' => $formattedModel]);
     }
 
-    public function getServiceById($id)
+    public function getById($id)
     {
         $model = Service::find($id);
 
@@ -79,16 +78,6 @@ class ServiceController extends Controller
         ], 404);
     }
 
-    public function getCategory(Request $request)
-    {
-        $categoryId = $request->category_id;
-
-        // Fetch users based on the company
-        $managers = Category::where('id', $categoryId)->get();
-
-        return response()->json($managers);
-    }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -98,16 +87,23 @@ class ServiceController extends Controller
     public function store(Store $request)
     {
         $message = isset($request->id) ? 'Updated' : 'created';
+
         $validatedData = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'description' => ['string', 'max:255'],
-            'category_id' => ['integer'],
+            'description' => ['nullable', 'string', 'max:255']
         ]);
 
-        Service::updateOrCreate(
-            ['id' => $request->id], // Use `id` to identify record for update
+        // Create or update the record
+        $service = Service::updateOrCreate(
+            ['id' => $request->id],
             $validatedData
         );
+
+        // If it's a new record and scode is not set, update scode with 4 leading zeros
+        if (!$request->id && empty($service->scode)) {
+            $service->scode = str_pad($service->id, 4, '0', STR_PAD_LEFT);
+            $service->save();
+        }
 
         return redirect()->back()->with('success', 'Service ' . $message . ' successfully.');
     }
@@ -131,7 +127,7 @@ class ServiceController extends Controller
         return response()->json(['message' => 'Service successfully deleted.', 200]);
     }
 
-    public function updateStatus(Request $request)
+    public function changeStatus(Request $request)
     {
 
         $id = $request->service_id;

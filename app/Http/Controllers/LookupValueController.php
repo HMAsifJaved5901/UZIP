@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Station;
+use App\Models\VendorLookupValue;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\LookupValue;
@@ -12,6 +14,8 @@ use App\Http\Requests\LookupValues\Store;
 use App\Http\Requests\LookupValues\Edit;
 use App\Http\Requests\LookupValues\Update;
 use App\Http\Requests\LookupValues\Destroy;
+use App\Models\Service;
+use Illuminate\Support\Facades\DB;
 
 
 /**
@@ -29,9 +33,11 @@ class LookupValueController extends Controller
      */
     public function index(Index $request)
     {
+        $stations = Station::select(['id', 'name'])->where('is_deleted', 0)->where('is_active', 1)->get();
         return view('pages.lookup_values.index',
             [
-                'records' => LookupValue::paginate(10)
+                'records' => LookupValue::paginate(10),
+                'stations' => $stations
             ]
         );
     }
@@ -45,9 +51,12 @@ class LookupValueController extends Controller
     public function transactionIndex(Index $request)
     {
         $desired_type = 'transaction_category';
+        $records = LookupValue::where('type', $desired_type)->get();
+        $stations = Station::select(['id', 'name'])->where('is_deleted', 0)->where('is_active', 1)->get();
         return view('pages.lookup_values.transaction_index',
             [
-                'records' => LookupValue::where('type', $desired_type)->get()
+                'stations' => $stations,
+                'records' => $records
             ]
         );
     }
@@ -61,8 +70,11 @@ class LookupValueController extends Controller
     public function incomeIndex(Index $request)
     {
         $desired_type = 'income_category';
+//        $services = Service::select(['id', 'name'])->where('is_deleted', 0)->where('is_active', 1)->get();
+        $stations = Station::select(['id', 'name'])->where('is_deleted', 0)->where('is_active', 1)->get();
         return view('pages.lookup_values.income_index',
             [
+                'stations' => $stations,
                 LookupValue::where('type', $desired_type)->get()
             ]
         );
@@ -77,8 +89,11 @@ class LookupValueController extends Controller
     public function expenseIndex(Index $request)
     {
         $desired_type = 'expense_category';
+//        $services = Service::select(['id', 'name'])->where('is_deleted', 0)->where('is_active', 1)->get();
+        $stations = Station::select(['id', 'name'])->where('is_deleted', 0)->where('is_active', 1)->get();
         return view('pages.lookup_values.expense_index',
             [
+                'stations' => $stations,
                 LookupValue::where('type', $desired_type)->get()
             ]
         );
@@ -86,24 +101,47 @@ class LookupValueController extends Controller
 
     public function getLookupList(Request $request)
     {
-        $lookup_model = LookupValue::where('type',$request->type)->get();
-        $formattedRoles = $lookup_model->map(function ($lookup) {
+        $lookup_model = LookupValue::leftJoin('services', 'services.id', '=', 'lookup_values.reference_value')
+            ->select(
+                'lookup_values.id',
+                'lookup_values.type',
+                'lookup_values.value',
+                'lookup_values.description',
+                'lookup_values.is_deleted',
+                DB::raw("COALESCE(services.name, 'NA') as reference_value")
+            )
+            ->where('lookup_values.type', $request->type)
+            ->where(function ($query) {
+                $query->where('lookup_values.reference_type', 'service')
+                    ->orWhereNull('lookup_values.reference_type');
+            })
+            ->get();
+
+        $formattedLookups = $lookup_model->map(function ($lookup) {
             return [
                 'id' => $lookup->id,
+                'reference_value' => $lookup->reference_value,
                 'type' => $lookup->type,
                 'value' => $lookup->value,
                 'description' => $lookup->description,
                 'is_deleted' => $lookup->is_deleted
             ];
         });
+
         // Return the data in the requested structure
-        return response()->json(['data' => $formattedRoles]);
+        return response()->json(['data' => $formattedLookups]);
     }
 
     public function getLookupById($id)
     {
         $lookup = LookupValue::where('id',$id)->first();
-        return response()->json(['data' => $lookup]);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'lookup' => $lookup
+            ],
+        ]);
     }
 
 
@@ -123,10 +161,12 @@ class LookupValueController extends Controller
         }
 
         // Fill model with request data
-        $model->fill($request->only(['type', 'value', 'description']));
+        $model->fill($request->only(['reference_type',
+            'reference_value','type', 'value', 'description']));
 
         // Save model and provide appropriate feedback
         if ($model->save()) {
+
             $message = $request->id
                 ? ucwords(str_replace('_', ' ', $request->type)) . ' updated successfully!'
                 : ucwords(str_replace('_', ' ', $request->type)) . ' saved successfully!';

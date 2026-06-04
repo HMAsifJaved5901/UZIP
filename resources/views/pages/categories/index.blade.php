@@ -20,7 +20,8 @@
             </div>
             <!-- Offcanvas to add new category -->
             <div
-                    class="offcanvas offcanvas-end"
+                    {{--class="offcanvas offcanvas-end"--}}
+                    class="offcanvas custom-centered-modal"
                     tabindex="-1"
                     id="offcanvasAddCategory"
                     aria-labelledby="offcanvasAddCategory"
@@ -144,7 +145,7 @@
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, delete it!',
+                    confirmButtonText: 'Yes, Suspend it!',
                     cancelButtonText: 'Cancel'
                 }).then(function(result) {
                     if (result.isConfirmed) {
@@ -156,8 +157,8 @@
                             },
                             success: function (response) {
                                 Swal.fire(
-                                    'Deleted!',
-                                    'The Category has been deleted.',
+                                    'Suspended!',
+                                    'The Category has been Suspended.',
                                     'success'
                                 ).then(function() {
                                     location.reload(); // Reload the page or handle UI updates

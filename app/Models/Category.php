@@ -20,24 +20,38 @@ class Category extends Model
     */
     protected $table = 'categories';
 
-    /**
-    * Mass assignable columns
-    */
-    protected $fillable=['name',
-'category_key',
-'sort_order',
-'slug',
-'description',
-'parent_id',
-'is_deleted'
-    ];
+    protected $fillable = ['name', 'ccode', 'category_key', 'sort_order', 'slug', 'description', 'parent_id', 'is_deleted'];
 
     /**
-    * Date time columns.
-    */
-    protected $dates=[];
+     * Get the immediate parent of this category.
+     */
+    public function parent()
+    {
+        return $this->belongsTo(Category::class, 'parent_id');
+    }
 
+    /**
+     * Get the immediate sub-categories (children).
+     */
+    public function subCategories()
+    {
+        return $this->hasMany(Category::class, 'parent_id')->orderBy('sort_order', 'asc');
+    }
 
+    /**
+     * Recursive relationship to get ALL descendants (children of children).
+     */
+    public function allChildren()
+    {
+        return $this->subCategories()->with('allChildren');
+    }
 
+    /**
+     * Scope to only get top-level categories.
+     */
+    public function scopeRoots($query)
+    {
+        return $query->whereNull('parent_id');
+    }
 
 }

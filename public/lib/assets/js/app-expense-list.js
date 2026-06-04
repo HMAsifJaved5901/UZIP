@@ -23,8 +23,10 @@ $(function () {
     var dt_expense_table = $('.datatables-expense'),
         select2 = $('.select2'),
         statusObj = {
-            0: {is_active: 'Active', class: 'bg-label-success'},
-            1: {is_active: 'Suspended', class: 'bg-label-success'}
+            0: {status: 'Pending', class: 'bg-label-warning'},
+            1: {status: 'Approved', class: 'bg-label-success'},
+            2: {status: 'Rejected', class: 'bg-label-danger'},
+            3: {status: 'Superseded', class: 'bg-label-info'}
         };
 
     // Company datatable
@@ -36,13 +38,12 @@ $(function () {
             columns: [
                 // columns according to JSON
                 {data: ''},
-                {data: 'expense_date'},
                 {data: 'station_name'},
-                {data: 'service_name'},
+                {data: 'expense_date'},
+                // {data: 'service_name'},
                 {data: 'category_name'},
                 {data: 'amount'},
-                {data: 'description'},
-                {data: 'is_deleted'},
+                {data: 'status'},
                 {data: ''}
             ],
             columnDefs: [
@@ -63,7 +64,7 @@ $(function () {
                     responsivePriority: 4,
                     render: function (data, type, full, meta) {
 
-                        var $expense_date = full['expense_date'],
+                        var $station_name = full['station_name'],
                             $image = full['avatar'],
                             $id = full['id'];
                         var userView = viewExpense.replace(':id', full['id']);
@@ -74,7 +75,7 @@ $(function () {
                             '<a href="' +
                             userView +
                             '" class="text-body text-truncate"><span class="fw-semibold">' +
-                            $expense_date +
+                            $station_name +
                             '</span></a>' +
                             '</div>' +
                             '</div>';
@@ -85,23 +86,23 @@ $(function () {
                     // Plans
                     targets: 2,
                     render: function (data, type, full, meta) {
-                        var $station_name = full['station_name'];
+                        var $expense_date = full['expense_date'];
 
-                        return '<span class="fw-semibold">' + $station_name + '</span>';
+                        return '<span class="fw-semibold">' + $expense_date + '</span>';
                     }
                 },
+                // {
+                //     // Plans
+                //     targets: 3,
+                //     render: function (data, type, full, meta) {
+                //         var $service_name = full['service_name'];
+                //
+                //         return '<span class="fw-semibold">' + $service_name + '</span>';
+                //     }
+                // },
                 {
                     // Plans
                     targets: 3,
-                    render: function (data, type, full, meta) {
-                        var $service_name = full['service_name'];
-
-                        return '<span class="fw-semibold">' + $service_name + '</span>';
-                    }
-                },
-                {
-                    // Plans
-                    targets: 4,
                     render: function (data, type, full, meta) {
                         var $category_name = full['category_name'];
 
@@ -110,7 +111,7 @@ $(function () {
                 },
                 {
                     // Plans
-                    targets: 5,
+                    targets: 4,
                     render: function (data, type, full, meta) {
                         var $amount = full['amount'];
 
@@ -118,24 +119,15 @@ $(function () {
                     }
                 },
                 {
-                    // Plans
-                    targets: 6,
-                    render: function (data, type, full, meta) {
-                        var $description = full['description'];
-
-                        return '<span class="fw-semibold">' + $description + '</span>';
-                    }
-                },
-                {
                     // User Status
-                    targets: 7,
+                    targets: 5,
                     render: function (data, type, full, meta) {
-                        var $is_deleted = full['is_deleted'];
+                        var $status = full['status'];
                         return (
                             '<span class="badge ' +
-                            statusObj[$is_deleted].class +
+                            statusObj[$status].class +
                             '" text-capitalized>' +
-                            statusObj[$is_deleted].is_active +
+                            statusObj[$status].status +
                             '</span>'
                         );
                     }
@@ -149,17 +141,17 @@ $(function () {
                     render: function (data, type, full, meta) {
                         var $expenseId = full['id'];
                         var $deleted = full['is_deleted'];
-                        var $status = full['is_active'];
-                        var statusText = $status === 1 ? 'Suspend' : 'Activate';
+                        var $status = full['status'];
+                        var statusText = $status === 1 ? 'Disable' : 'Activate';
                         var deletedText = $deleted === 0 ? '<i class="ti ti-trash ti-sm mx-2"></i>' : '<i class="fas fa-trash-restore-alt ti-sm mx-2"></i>';
                         var $action = $deleted === 1 ? 'restore' : 'delete';
                         var deletedView = $deleted === 0 ? 'block' : 'none';
                         var userView = viewExpense.replace(':id', full['id']);
                         return (
-                            '<div class="d-flex align-items-center">' +
-                            '<a href="javascript:;" style="display: ' + deletedView + '" id="update_expense' + full['id'] + '" data-expense_id="' + full['id'] + '" tabindex="0" aria-controls="DataTables_Table_0" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAddExpense" class="text-body"><i class="ti ti-edit ti-sm me-2"></i></a>' +
-                            '<a href="javascript:;" id="delete_expense' + full['id'] + '" data-expense_id="' + full['id'] + '" data-action_type="' + $action + '" class="text-body delete-record">' + deletedText + '</a>' +
-                            '<a href="' + userView + '" id="view_expense' + full['id'] + '" class="text-body"><i class="ti ti-eye ti-sm me-2"></i></a>' +
+                            '<div class="d-flex align-items-center justify-content-end">' +
+                            '<a href="javascript:;" style="display: ' + deletedView + '" id="update_expense' + full['id'] + '" data-expense_id="' + full['id'] + '" tabindex="0" aria-controls="DataTables_Table_0" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAddExpense" class="text-body btn-edit"><i class="ti ti-edit ti-sm"></i></a>' +
+                            '<a href="javascript:;" id="delete_expense' + full['id'] + '" data-expense_id="' + full['id'] + '" data-action_type="' + $action + '" class="text-body delete-record btn-delete">' + deletedText + '</a>' +
+                            '<a href="' + userView + '" id="view_expense' + full['id'] + '" class="text-body btn-view"><i class="ti ti-eye ti-sm"></i></a>' +
                             '</div>'
                         );
                     }
@@ -184,7 +176,7 @@ $(function () {
             buttons: [
                 {
                     extend: 'collection',
-                    className: 'btn btn-label-secondary dropdown-toggle mx-3',
+                    className: 'btn btn-label-secondary dropdown-toggle mx-3 bg-custom-black text-white',
                     text: '<i class="ti ti-screen-share me-1 ti-xs"></i>Export',
                     buttons: [
                         {
@@ -324,7 +316,7 @@ $(function () {
                 },
                 {
                     text: '<i class="ti ti-plus me-0 me-sm-1 ti-xs"></i><span class="d-none d-sm-inline-block">Add Expense</span>',
-                    className: 'add-new btn btn-primary',
+                    className: 'add-new btn btn-primary Rectangle_4',
                     attr: {
                         'data-bs-toggle': 'offcanvas',
                         'data-bs-target': '#offcanvasAddExpense'
@@ -332,38 +324,38 @@ $(function () {
                 }
             ],
             // For responsive popup
-            responsive: {
-                details: {
-                    display: $.fn.dataTable.Responsive.display.modal({
-                        header: function (row) {
-                            var data = row.data();
-                            return 'Details of ' + data['full_name'];
-                        }
-                    }),
-                    type: 'column',
-                    renderer: function (api, rowIdx, columns) {
-                        var data = $.map(columns, function (col, i) {
-                            return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
-                                ? '<tr data-dt-row="' +
-                                col.rowIndex +
-                                '" data-dt-column="' +
-                                col.columnIndex +
-                                '">' +
-                                '<td>' +
-                                col.title +
-                                ':' +
-                                '</td> ' +
-                                '<td>' +
-                                col.data +
-                                '</td>' +
-                                '</tr>'
-                                : '';
-                        }).join('');
+            // responsive: {
+            //     details: {
+            //         display: $.fn.dataTable.Responsive.display.modal({
+            //             header: function (row) {
+            //                 var data = row.data();
+            //                 return 'Details of ' + data['full_name'];
+            //             }
+            //         }),
+            //         type: 'column',
+            //         renderer: function (api, rowIdx, columns) {
+            //             var data = $.map(columns, function (col, i) {
+            //                 return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
+            //                     ? '<tr data-dt-row="' +
+            //                     col.rowIndex +
+            //                     '" data-dt-column="' +
+            //                     col.columnIndex +
+            //                     '">' +
+            //                     '<td>' +
+            //                     col.title +
+            //                     ':' +
+            //                     '</td> ' +
+            //                     '<td>' +
+            //                     col.data +
+            //                     '</td>' +
+            //                     '</tr>'
+            //                     : '';
+            //             }).join('');
 
-                        return data ? $('<table class="table"/><tbody />').append(data) : false;
-                    }
-                }
-            },
+            //             return data ? $('<table class="table"/><tbody />').append(data) : false;
+            //         }
+            //     }
+            // },
             initComplete: function () {
                 // Adding status filter once table initialized
                 this.api()

@@ -583,3 +583,21 @@ if (typeof $ !== 'undefined') {
     }
   });
 }
+
+
+
+if (typeof Swal !== 'undefined' && Swal.fire) {
+  const originalSwalFire = Swal.fire.bind(Swal); // bind keeps correct internal context
+
+  Swal.fire = function (options) {
+    return originalSwalFire({
+      showClass: {
+        popup: 'animate__animated animate__fadeInUp animate__faster',
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutDown animate__faster',
+      },
+      ...options
+    });
+  };
+}

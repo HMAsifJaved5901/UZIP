@@ -214,38 +214,38 @@ $(function () {
         }
       ],
       // For responsive popup
-      responsive: {
-        details: {
-          display: $.fn.dataTable.Responsive.display.modal({
-            header: function (row) {
-              var data = row.data();
-              return 'Details of ' + data['full_name'];
-            }
-          }),
-          type: 'column',
-          renderer: function (api, rowIdx, columns) {
-            var data = $.map(columns, function (col, i) {
-              return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
-                ? '<tr data-dt-row="' +
-                    col.rowIndex +
-                    '" data-dt-column="' +
-                    col.columnIndex +
-                    '">' +
-                    '<td>' +
-                    col.title +
-                    ':' +
-                    '</td> ' +
-                    '<td>' +
-                    col.data +
-                    '</td>' +
-                    '</tr>'
-                : '';
-            }).join('');
+    //   responsive: {
+    //     details: {
+    //       display: $.fn.dataTable.Responsive.display.modal({
+    //         header: function (row) {
+    //           var data = row.data();
+    //           return 'Details of ' + data['full_name'];
+    //         }
+    //       }),
+    //       type: 'column',
+    //       renderer: function (api, rowIdx, columns) {
+    //         var data = $.map(columns, function (col, i) {
+    //           return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
+    //             ? '<tr data-dt-row="' +
+    //                 col.rowIndex +
+    //                 '" data-dt-column="' +
+    //                 col.columnIndex +
+    //                 '">' +
+    //                 '<td>' +
+    //                 col.title +
+    //                 ':' +
+    //                 '</td> ' +
+    //                 '<td>' +
+    //                 col.data +
+    //                 '</td>' +
+    //                 '</tr>'
+    //             : '';
+    //         }).join('');
 
-            return data ? $('<table class="table"/><tbody />').append(data) : false;
-          }
-        }
-      },
+    //         return data ? $('<table class="table"/><tbody />').append(data) : false;
+    //       }
+    //     }
+    //   },
       initComplete: function () {
         // Adding role filter once table initialized
         this.api()

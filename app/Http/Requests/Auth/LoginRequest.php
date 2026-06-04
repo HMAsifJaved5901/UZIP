@@ -49,6 +49,19 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // Get the authenticated user
+        $user = Auth::user();
+
+        // Check if login_web is 1 and status is 1
+        if ($user->login_web !== 1 || $user->status !== 1) {
+            Auth::logout(); // Log out the user if they don't meet the criteria
+            RateLimiter::hit($this->throttleKey()); // Still hit the rate limiter for failed attempts
+
+            throw ValidationException::withMessages([
+                'email' => trans('auth.failed_credentials_or_inactive'), // Custom message for this scenario
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

@@ -1,54 +1,74 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+
 /**
-   @property int $category_id category id
-@property varchar $name name
-@property varchar $code code
-@property int $company_id company id
-@property int $manager_id manager id
-@property varchar $location location
-@property decimal $latitude latitude
-@property decimal $longitude longitude
-@property varchar $phone phone
-@property varchar $opening_hours opening hours
-@property int $is_active is active
-@property tinyint $is_deleted is deleted
-@property timestamp $created_at created at
-@property timestamp $updated_at updated at
-   
+ * @property int $category_id category id
+ * @property int $pos_id pos id
+ * @property varchar $name name
+ * @property varchar $code code
+ * @property int $company_id company id
+ * @property int $manager_id manager id
+ * @property varchar $location location
+ * @property decimal $latitude latitude
+ * @property decimal $longitude longitude
+ * @property varchar $phone phone
+ * @property varchar $opening_hours opening hours
+ * @property int $is_active is active
+ * @property tinyint $is_deleted is deleted
+ * @property timestamp $created_at created at
+ * @property timestamp $updated_at updated at
  */
-class Station extends Model 
+class Station extends Model
 {
-    
+
     /**
-    * Database table name
-    */
+     * Database table name
+     */
     protected $table = 'stations';
 
     /**
-    * Mass assignable columns
-    */
-    protected $fillable=['category_id',
-'name',
-'code',
-'company_id',
-'manager_id',
-'location',
-'latitude',
-'longitude',
-'phone',
-'opening_hours',
-'is_active',
-'is_deleted'];
+     * Mass assignable columns
+     */
+    protected $fillable = ['category_id',
+        'pos_id',
+        'name',
+        'code',
+        'company_id',
+        'manager_id',
+        'location',
+        'latitude',
+        'longitude',
+        'phone',
+        'opening_hours',
+        'is_active',
+        'is_deleted'];
 
     /**
-    * Date time columns.
-    */
-    protected $dates=[];
+     * Date time columns.
+     */
+    protected $dates = [];
 
 
+    public function services()
+    {
+        return $this->belongsToMany(Service::class, 'station_services')
+            ->withPivot([
+                'is_dealer',
+                'is_commission',
+                'supplier_id',
+                'pos_id',
+                'restaurant_pos_id',
+                'car_wash_operator_id',
+                'is_active',
+            ]);
+    }
 
+    public function employees()
+    {
+        return $this->hasManyThrough(User::class, EmployeeService::class, 'station_id', 'id', 'id', 'employee_id');
+    }
 
 }

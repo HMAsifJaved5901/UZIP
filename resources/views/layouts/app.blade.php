@@ -8,8 +8,9 @@
 <head>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet"/>
+    {{--<link rel="preconnect" href="https://fonts.bunny.net">--}}
+    {{--<link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet">--}}
+
     <meta charset="utf-8"/>
     <meta
             name="viewport"
@@ -61,6 +62,13 @@
     <link rel="stylesheet" href="{{ asset('lib/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css') }}"/>
     <link rel="stylesheet" href="{{ asset('lib/assets/vendor/libs/select2/select2.css') }}"/>
     <link rel="stylesheet" href="{{ asset('lib/assets/vendor/libs/sweetalert2/sweetalert2.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('lib/assets/vendor/libs/flatpickr/flatpickr.css') }}"/>
+    <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+  />
+
+    <link rel="stylesheet" href="{{ asset('lib/assets/css/custom.css') }}"/>
     <!-- Helpers -->
     <script src="{{ asset('lib/assets/vendor/js/helpers.js') }}"></script>
 
@@ -125,11 +133,14 @@
 <script src="{{ asset('lib/assets/vendor/libs/swiper/swiper.js') }}"></script>
 <script src="{{ asset('lib/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js') }}"></script>
 
-<script src="{{ asset('lib/assets/vendor/libs/formvalidation/dist/js/FormValidation.min.js') }}"></script>
-<script src="{{ asset('lib/assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js') }}"></script>
-<script src="{{ asset('lib/assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js') }}"></script>
+{{--<script src="{{ asset('lib/assets/vendor/libs/formvalidation/dist/js/FormValidation.min.js') }}"></script>--}}
+{{--<script src="{{ asset('lib/assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js') }}"></script>--}}
+{{--<script src="{{ asset('lib/assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js') }}"></script>--}}
 <script src="{{ asset('lib/assets/vendor/libs/select2/select2.js') }}"></script>
 
+<script src="{{ asset('lib/assets/vendor/libs/sweetalert2/sweetalert2.js') }}"></script>
+<script src="{{ asset('lib/assets/js/extended-ui-sweetalert2.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- Main JS -->
 <script src="{{ asset('lib/assets/js/main.js') }}"></script>
 
@@ -138,10 +149,9 @@
 <script src="{{ asset('lib/assets/js/pages-auth.js') }}"></script>
 <script src="{{ asset('lib/assets/vendor/libs/cleavejs/cleave.js') }}"></script>
 <script src="{{ asset('lib/assets/vendor/libs/cleavejs/cleave-phone.js') }}"></script>
-<script src="{{ asset('lib/assets/js/modal-add-role.js') }}"></script>
-<script src="{{ asset('lib/assets/vendor/libs/sweetalert2/sweetalert2.js') }}"></script>
-<script src="{{ asset('lib/assets/js/extended-ui-sweetalert2.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ asset('lib/assets/js/tables-datatables-advanced.js') }}"></script>
+<script src="{{ asset('lib/assets/vendor/libs/flatpickr/flatpickr.js') }}"></script>
+
 
 {{ $scripts ?? '' }}
 </body>

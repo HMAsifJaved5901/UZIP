@@ -6,8 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property varchar $config_key config key
+ * @property int $service_id Service ID
  * @property varchar $label label
  * @property varchar $value value
+ * @property varchar $value_unit Value Unit
  * @property text $description description
  */
 class Configuration extends Model
@@ -21,10 +23,11 @@ class Configuration extends Model
     /**
      * Mass assignable columns
      */
-    protected $fillable = ['description',
-        'config_key',
+    protected $fillable = ['config_key',
+        'service_id',
         'label',
         'value',
+        'value_unit',
         'is_deleted',
         'description'];
 

@@ -1,198 +1,184 @@
 <x-app-layout>
+    <x-slot name="links">
+        <link rel="stylesheet" href="{{ asset('lib/assets/vendor/css/pages/ui-carousel.css') }}"/>
+    </x-slot>
     <!-- Content -->
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="row invoice-edit">
             <!-- Invoice Edit-->
-            <div class="col-lg-9 col-12 mb-lg-0 mb-4">
+            <div class="col-lg-12 col-12 mb-lg-0 mb-4">
                 <div class="card invoice-preview-card">
                     <div class="card-body">
+                        @if(isset($record) && $record->transaction_adjustment_id)
+                            @php
+                                $adjustmentRecord = \App\Models\TransactionAdjustment::find($record->transaction_adjustment_id);
+                            @endphp
+
+                            @if($adjustmentRecord)
+                                <div class="alert alert-light-danger d-flex align-items-center justify-content-between border border-danger border-opacity-25 rounded-3 p-3 mt-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar avatar-sm bg-label-danger me-3 p-2">
+                                            <i class="ti ti-alert-triangle fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 text-danger fw-bold">Rejected Transaction</h6>
+                                            <small class="text-muted">View detail of rejected transaction record.
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <a href="{{ route('expense.view', ['id' => $adjustmentRecord->original_record_id]) }}"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       class="btn btn-danger btn-sm px-4 shadow-sm">
+                                        <i class="ti ti-external-link me-1"></i> View Details
+                                    </a>
+                                </div>
+                            @endif
+                        @endif
                         <div class="row m-sm-4 m-0">
                             <div class="col-md-6 mb-md-0 mb-4 ps-0">
-                                <div class="d-flex svg-illustration mb-4 gap-2 align-items-center">
-                                    <svg
-                                            width="32"
-                                            height="22"
-                                            viewBox="0 0 32 22"
-                                            fill="none"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                                fill-rule="evenodd"
-                                                clip-rule="evenodd"
-                                                d="M0.00172773 0V6.85398C0.00172773 6.85398 -0.133178 9.01207 1.98092 10.8388L13.6912 21.9964L19.7809 21.9181L18.8042 9.88248L16.4951 7.17289L9.23799 0H0.00172773Z"
-                                                fill="#7367F0"
-                                        />
-                                        <path
-                                                opacity="0.06"
-                                                fill-rule="evenodd"
-                                                clip-rule="evenodd"
-                                                d="M7.69824 16.4364L12.5199 3.23696L16.5541 7.25596L7.69824 16.4364Z"
-                                                fill="#161616"
-                                        />
-                                        <path
-                                                opacity="0.06"
-                                                fill-rule="evenodd"
-                                                clip-rule="evenodd"
-                                                d="M8.07751 15.9175L13.9419 4.63989L16.5849 7.28475L8.07751 15.9175Z"
-                                                fill="#161616"
-                                        />
-                                        <path
-                                                fill-rule="evenodd"
-                                                clip-rule="evenodd"
-                                                d="M7.77295 16.3566L23.6563 0H32V6.88383C32 6.88383 31.8262 9.17836 30.6591 10.4057L19.7824 22H13.6938L7.77295 16.3566Z"
-                                                fill="#7367F0"
-                                        />
-                                    </svg>
+                                <div class="c-store-view">
+                                    <div class="c-store-view-content">
+                                        <h3>Expense Data:</h3>
+                                        <ul>
 
-                                    <span class="app-brand-text fw-bold fs-4"> UZIP Expense</span>
+                                            @if(!empty($record->station_name))
+                                                <li>Station Name:<span>{{ $record->station_name }}</span></li>
+                                            @endif
+                                            @if(!empty($record->expense_date))
+                                                <li>Expense Date:<span>{{ $record->expense_date }}</span></li>
+                                            @endif
+
+                                            @if(!empty($record->category_name))
+                                                <li>Category Name:<span>{{ $record->category_name }}</span></li>
+                                            @endif
+
+                                            @if(!empty($record->service_name))
+                                                <li>Service Name:<span>{{ $record->service_name }}</span></li>
+                                            @endif
+                                            @if(isset($record->exp_quantity) && isset($record->exp_si_unit))
+                                                <li>Expense
+                                                    Quantity:<span>{{ $record->exp_quantity }} {{ $record->exp_si_unit }}</span>
+                                                </li>
+                                            @endif
+                                            @if(!empty($record->rejected_reason))
+                                                <li>Rejected Reason:<span>{{ $record->rejected_reason }}</span></li>
+                                            @endif
+                                        </ul>
+                                    </div>
+                                    <div class="c-store-total">
+                                        <div class="row">
+                                            <div class="col-md-{{ $adjustmentAmount > 0 ? '6 text-left' : '12 text-center' }}">
+                                                <h3>Total Cash</h3>
+                                                <h1>${{ number_format($record->amount ?? 0, 2, '.', ',') }}</h1>
+                                            </div>
+
+                                            @if($adjustmentAmount != 0)
+                                                <div class="col-md-6 text-right">
+                                                    <h3>Rejected Resubmission Difference:</h3>
+                                                    <h1>${{ number_format($adjustmentAmount, 2, '.', ',') }}</h1>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="card-block">
-                                    <table class="table table-striped">
-                                        <tbody>
-                                        <tr>
-                                            <th>Station Name:</th>
-                                            <td><a class="justify-content-right" href="javascript:void(0)">{{$record->station_name}}</a></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Service Type:</th>
-                                            <td><a class="justify-content-right" href="javascript:void(0)">{{$record->category_name}}</a></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Service:</th>
-                                            <td><a class="justify-content-right" href="javascript:void(0)">{{$record->service_name}}</a></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Amount::</th>
-                                            <td><a class="justify-content-right" href="javascript:void(0)">{{number_format($record->amount)}})</a></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Description:</th>
-                                            <td><a class="justify-content-right" href="javascript:void(0)">{{$record->description}}</a></td>
-                                        </tr>
+                                <div class="mt-4 text-center">
+                                    @if($record->status == 0)
+                                        <form action="{{ route('expense.operation.approve', $record->id) }}"
+                                              method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-primary">Approve</button>
+                                        </form>
 
-                                        </tbody>
-                                    </table>
+                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                                data-bs-target="#rejectModalExpense">
+                                            Reject
+                                        </button>
+                                    @endif
+
+                                    @if($record->status == 1)
+                                        <form action="{{ route('expense.operation.pending', $record->id) }}"
+                                              method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-warning">Pending</button>
+                                        </form>
+                                    @endif
+
+                                    <a href="{{ url()->previous() }}" class="btn btn-primary">
+                                        Go Back
+                                    </a>
+
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <dl class="row mb-2">
-                                    <dt class="col-sm-5 mb-2 mb-sm-0 text-md-end ps-0">
-                                        <span class="h4 text-capitalize mb-0 text-nowrap">Invoice</span>
-                                    </dt>
-                                    <dd class="col-sm-7 d-flex justify-content-md-end pe-0 ps-0 ps-sm-2">
-                                        <div class="input-group input-group-merge disabled w-px-350">
-                                            <span class="input-group-text">#</span>
-                                            <input
-                                                    type="text"
-                                                    class="form-control"
-                                                    disabled
-                                                    placeholder="74909"
-                                                    value="{{$record->invoice_no}}"
-                                                    id="invoiceId"
-                                            />
-                                        </div>
-                                    </dd>
-                                    <dt class="col-sm-5 mb-2 mb-sm-0 text-md-end ps-0 mt-2">
-                                        <span class="fw-normal">Expense Date:</span>
-                                    </dt>
-                                    <dd class="col-sm-7 d-flex justify-content-md-end pe-0 ps-0 ps-sm-2">
-                                        <input type="text" class="form-control w-px-450 invoice-date"
-                                               value="{{\Carbon\Carbon::parse($record->expense_date)->format('F j, Y')}}" placeholder="YYYY-MM-DD"/>
-                                    </dd>
-                                </dl>
-                                <dl class="row mb-2">
-                                    <dt class="col-sm-12 mb-2 mb-sm-0 text-md-end ps-0">
-                                        <div class="card h-100">
-                                            <div class="card-body">
-                                                <h5 class="card-title"></h5>
-                                                <img class="img-fluid d-flex mx-auto my-4 rounded" src="{{asset('/storage/'.$record->image_file)}}" alt="Card image cap">
+                            <div class="col-md-6 mb-md-0 mb-4 ps-0">
+                                <div class="col-md-12 mb-4">
+                                    <!--<h6 class="text-muted mt-3">Gaming Bet Lotto Images</h6>-->
+                                    <div class="swiper" id="swiper-with-progress">
+                                        @if($images && count($images) > 0)
+                                            <div class="swiper-wrapper">
+                                                @foreach($images as $image)
+                                                    <div class="swiper-slide">
+                                                        <img src="{{ asset($image->image_path) }}"
+                                                             class="img-thumbnail img-clickable" data-bs-toggle="modal"
+                                                             data-bs-target="#imageModal"
+                                                             data-bs-src="{{ asset($image->image_path) }}">
+                                                    </div>
+                                                @endforeach
                                             </div>
-                                        </div>
-                                    </dt>
-                                </dl>
+                                            <div class="swiper-pagination"></div>
+                                            <div class="swiper-button-next swiper-button-white custom-icon"></div>
+                                            <div class="swiper-button-prev swiper-button-white custom-icon"></div>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        <hr class="my-3 mx-n4"/>
                     </div>
                 </div>
             </div>
-            <!-- /Invoice Edit-->
+        </div>
+    </div>
 
-            <!-- Invoice Actions -->
-            <div class="col-lg-3 col-12 invoice-actions">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <button
-                                class="btn btn-primary d-grid w-100"
-                                data-bs-toggle="offcanvas"
-                                data-bs-target="#sendInvoiceOffcanvas"
-                        >
-                        <span class="d-flex align-items-center justify-content-center text-nowrap">
-                            <i class="ti ti-send ti-xs me-1"></i>Send Invoice</span>
-                        </button>
-                    </div>
+    <!-- Bootstrap Modal for Image Enlargement -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModalLabel">Expanded Image</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="" id="modalImage" class="img-fluid">
                 </div>
             </div>
-            <!-- /Invoice Actions -->
         </div>
+    </div>
 
-        <!-- Offcanvas -->
-        <!-- Send Invoice Sidebar -->
-        <div class="offcanvas offcanvas-end" id="sendInvoiceOffcanvas" aria-hidden="true">
-            <div class="offcanvas-header my-1">
-                <h5 class="offcanvas-title">Send Invoice</h5>
-                <button
-                        type="button"
-                        class="btn-close text-reset"
-                        data-bs-dismiss="offcanvas"
-                        aria-label="Close"
-                ></button>
-            </div>
-            <div class="offcanvas-body pt-0 flex-grow-1">
-                <form>
-                    <div class="mb-3">
-                        <label for="invoice-from" class="form-label">From</label>
-                        <input
-                                type="text"
-                                class="form-control"
-                                id="invoice-from"
-                                value="shelbyComapny@email.com"
-                                placeholder="company@email.com"
-                        />
-                    </div>
-                    <div class="mb-3">
-                        <label for="invoice-to" class="form-label">To</label>
-                        <input
-                                type="text"
-                                class="form-control"
-                                id="invoice-to"
-                                value="qConsolidated@email.com"
-                                placeholder="company@email.com"
-                        />
-                    </div>
-                    <div class="mb-3">
-                        <label for="invoice-message" class="form-label">Message</label>
-                        <textarea class="form-control" name="invoice-message" id="invoice-message" cols="3" rows="8">
-                        </textarea
-                        >
-                    </div>
-                    <div class="mb-3 d-flex flex-wrap">
-                        <button type="button" class="btn btn-primary me-3" data-bs-dismiss="offcanvas">Send</button>
-                        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="offcanvas">Cancel
-                        </button>
-                    </div>
-                </form>
+    <div class="modal fade" id="rejectModalExpense" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Expense</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ route('expense.operation.reject', $record->id) }}" method="POST"
+                          class="d-inline ms-2">
+                        @csrf
+                        <input type="text" class="form-control" id="rejected_reason"
+                               placeholder="Please add reject reason" maxlength="255" required="required"
+                               name="rejected_reason">
+                        <br>
+                        <button type="submit" class="btn btn-primary">Reject</button>
+                    </form>
+                </div>
             </div>
         </div>
-        <!-- /Send Invoice Sidebar -->
-
-        <!-- /Offcanvas -->
     </div>
     <!-- / Content -->
 
     <x-slot name="scripts">
-
+        <script src="{{ asset('lib/assets/js/ui-carousel.js') }}"></script>
         @if ($errors->any())
             <script>
                 Swal.fire({
@@ -211,8 +197,21 @@
                     text: '{{ session('success') }}'
                 });
             </script>
-        @endif
+    @endif
 
+    <!-- JavaScript to Handle Image Click and Expansion -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const modalImage = document.getElementById("modalImage");
+                const imageModal = document.getElementById("imageModal");
+
+                document.querySelectorAll(".img-clickable").forEach(function (img) {
+                    img.addEventListener("click", function () {
+                        modalImage.src = this.getAttribute("data-bs-src");
+                    });
+                });
+            });
+        </script>
     </x-slot>
 
 </x-app-layout>

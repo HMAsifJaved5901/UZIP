@@ -19,6 +19,7 @@ $(function () {
     }
 
     var viewStation = document.getElementById('fetchStationViewRoute').getAttribute('data-url');
+    var viewStationCashFlow = document.getElementById('fetchStationCashFlowViewRoute').getAttribute('data-url');
     // Variable declaration for table
     var dt_station_table = $('.datatables-station'),
         select2 = $('.select2'),
@@ -39,9 +40,9 @@ $(function () {
                 {data: 'name'},
                 {data: 'code'},
                 {data: 'company_name'},
-                {data: 'manager_name'},
                 {data: 'location'},
                 {data: 'phone'},
+                {data: 'opening_hours'},
                 {data: 'is_active'},
                 {data: 'action'}
             ],
@@ -122,15 +123,6 @@ $(function () {
                     // Plans
                     targets: 4,
                     render: function (data, type, full, meta) {
-                        var $manager = full['manager_name'];
-
-                        return '<span class="fw-semibold">' + $manager + '</span>';
-                    }
-                },
-                {
-                    // Plans
-                    targets: 5,
-                    render: function (data, type, full, meta) {
                         var $location = full['location'];
 
                         return '<span class="fw-semibold">' + $location + '</span>';
@@ -138,11 +130,20 @@ $(function () {
                 },
                 {
                     // Plans
-                    targets: 6,
+                    targets: 5,
                     render: function (data, type, full, meta) {
                         var $phone = full['phone'];
 
                         return '<span class="fw-semibold">' + $phone + '</span>';
+                    }
+                },
+                {
+                    // opening_hours
+                    targets: 6,
+                    render: function (data, type, full, meta) {
+                        var $opening_hours = full['opening_hours'];
+
+                        return '<span class="fw-semibold">' + $opening_hours + '</span>';
                     }
                 },
                 {
@@ -170,20 +171,22 @@ $(function () {
                         var $stationId = full['id'];
                         var $deleted = full['is_deleted'];
                         var $status = full['is_active'];
-                        var statusText = $status === 1 ? 'Suspend' : 'Activate';
+                        var statusText = $status === 1 ? 'Disable' : 'Activate';
                         var deletedText = $deleted === 0 ? '<i class="ti ti-trash ti-sm mx-2"></i>' : '<i class="fas fa-trash-restore-alt ti-sm mx-2"></i>';
                         var $action = $deleted === 1 ? 'restore' : 'delete';
                         var deletedView = $deleted === 0 ? 'block' : 'none';
                         var userView = viewStation.replace(':id', full['id']);
+                        var cashFlowView = viewStationCashFlow.replace(':id', full['id']);
                         return (
-                            '<div class="d-flex align-items-center">' +
-                            '<a href="javascript:;" style="display: ' + deletedView + '" id="update_station' + full['id'] + '" data-station_id="' + full['id'] + '" tabindex="0" aria-controls="DataTables_Table_0" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAddStation" class="text-body"><i class="ti ti-edit ti-sm me-2"></i></a>' +
-                            '<a href="javascript:;" id="delete_station' + full['id'] + '" data-station_id="' + full['id'] + '" data-action_type="' + $action + '" class="text-body delete-record">' + deletedText + '</a>' +
-                            '<a href="' + userView + '" id="view_station' + full['id'] + '" class="text-body"><i class="ti ti-eye ti-sm me-2"></i></a>' +
-                            '<a href="javascript:;" class="text-body dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="ti ti-dots-vertical ti-sm mx-1"></i></a>' +
-                            '<div class="dropdown-menu dropdown-menu-end m-0">' +
-                            '<a href="javascript:;" style="display: ' + deletedView + '" data-station_id="' + full['id'] + '" class="update-status dropdown-item" id="status' + full['id'] + '" >' + statusText + '</a>' +
-                            '</div>' +
+                            '<div class="d-flex align-items-center justify-content-end">' +
+                            '<a href="javascript:;" style="display: ' + deletedView + '" id="update_station' + full['id'] + '" data-station_id="' + full['id'] + '" tabindex="0" aria-controls="DataTables_Table_0" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAddStation" class="text-body btn-edit"><i class="ti ti-edit ti-sm me-2"></i></a>' +
+                            '<a href="javascript:;" id="delete_station' + full['id'] + '" data-station_id="' + full['id'] + '" data-action_type="' + $action + '" class="text-body delete-record btn-delete">' + deletedText + '</a>' +
+                            '<a href="' + userView + '" id="view_station' + full['id'] + '" class="text-body btn-view"><i class="ti ti-eye ti-sm"></i></a>' +
+                            // '<a href="'+cashFlowView+'" class="text-body" id="cashflow" data-bs-toggle="tooltip" data-bs-placement="top" title="View Cash Flow"><i class="menu-icon tf-icons fas fa-receipt"></i></a>'+
+                            // '<a href="javascript:;" class="text-body dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="ti ti-dots-vertical ti-sm mx-1"></i></a>' +
+                            // '<div class="dropdown-menu dropdown-menu-end m-0">' +
+                            // '<a href="javascript:;" style="display: ' + deletedView + '" data-station_id="' + full['id'] + '" class="update-status dropdown-item" id="status' + full['id'] + '" >' + statusText + '</a>' +
+                            // '</div>' +
                             '</div>'
                         );
                     }
@@ -208,7 +211,7 @@ $(function () {
             buttons: [
                 {
                     extend: 'collection',
-                    className: 'btn btn-label-secondary dropdown-toggle mx-3',
+                    className: 'btn btn-label-secondary dropdown-toggle mx-3 bg-custom-black text-white',
                     text: '<i class="ti ti-screen-share me-1 ti-xs"></i>Export',
                     buttons: [
                         {
@@ -347,8 +350,8 @@ $(function () {
                     ]
                 },
                 {
-                    text: '<i class="ti ti-plus me-0 me-sm-1 ti-xs"></i><span class="d-none d-sm-inline-block">Add New Station</span>',
-                    className: 'add-new btn btn-primary',
+                    text: '<i class="ti ti-plus me-0 me-sm-1 ti-xs"></i><span class="d-none d-sm-inline-block">Add New Site</span>',
+                    className: 'add-new btn-primary Rectangle_4',
                     attr: {
                         'data-bs-toggle': 'offcanvas',
                         'data-bs-target': '#offcanvasAddStation'
@@ -356,38 +359,38 @@ $(function () {
                 }
             ],
             // For responsive popup
-            responsive: {
-                details: {
-                    display: $.fn.dataTable.Responsive.display.modal({
-                        header: function (row) {
-                            var data = row.data();
-                            return 'Details of ' + data['full_name'];
-                        }
-                    }),
-                    type: 'column',
-                    renderer: function (api, rowIdx, columns) {
-                        var data = $.map(columns, function (col, i) {
-                            return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
-                                ? '<tr data-dt-row="' +
-                                col.rowIndex +
-                                '" data-dt-column="' +
-                                col.columnIndex +
-                                '">' +
-                                '<td>' +
-                                col.title +
-                                ':' +
-                                '</td> ' +
-                                '<td>' +
-                                col.data +
-                                '</td>' +
-                                '</tr>'
-                                : '';
-                        }).join('');
+            // responsive: {
+            //     details: {
+            //         display: $.fn.dataTable.Responsive.display.modal({
+            //             header: function (row) {
+            //                 var data = row.data();
+            //                 return 'Details of ' + data['full_name'];
+            //             }
+            //         }),
+            //         type: 'column',
+            //         renderer: function (api, rowIdx, columns) {
+            //             var data = $.map(columns, function (col, i) {
+            //                 return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
+            //                     ? '<tr data-dt-row="' +
+            //                     col.rowIndex +
+            //                     '" data-dt-column="' +
+            //                     col.columnIndex +
+            //                     '">' +
+            //                     '<td>' +
+            //                     col.title +
+            //                     ':' +
+            //                     '</td> ' +
+            //                     '<td>' +
+            //                     col.data +
+            //                     '</td>' +
+            //                     '</tr>'
+            //                     : '';
+            //             }).join('');
 
-                        return data ? $('<table class="table"/><tbody />').append(data) : false;
-                    }
-                }
-            },
+            //             return data ? $('<table class="table"/><tbody />').append(data) : false;
+            //         }
+            //     }
+            // },
             initComplete: function () {
                 // Adding status filter once table initialized
                 this.api()

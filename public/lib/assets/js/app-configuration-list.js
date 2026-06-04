@@ -31,12 +31,15 @@ $(function () {
     // Users datatable
     if (dt_lookup_table.length) {
         var configurationRoute = document.getElementById('fetchConfigurationRoute').getAttribute('data-url');
+        var configuration_type = document.getElementById('configuration_type').value;
+
         var dt_configuration = dt_lookup_table.DataTable({
             ajax: configurationRoute, // JSON file to add data
             columns: [
                 // columns according to JSON
                 {data: ''},
                 {data: 'config_key'},
+                // {data: 'service_name'},
                 {data: 'label'},
                 {data: 'value'},
                 {data: 'description'},
@@ -62,6 +65,14 @@ $(function () {
                         return "<span class='text-truncate d-flex align-items-center'>" + $config_key + '</span>';
                     }
                 },
+                // {
+                //     // Lookup value
+                //     targets: 2,
+                //     render: function (data, type, full, meta) {
+                //         var $service_name = full['service_name'];
+                //         return "<span class='text-truncate d-flex align-items-center'>" + $service_name + '</span>';
+                //     }
+                // },
                 {
                     // lookup Description
                     targets: 2,
@@ -76,7 +87,8 @@ $(function () {
                     targets: 3,
                     render: function (data, type, full, meta) {
                         var $value = full['value'];
-                        return '<span class="fw-semibold">$' + $value + '</span>';
+                        var $unit = full['value_unit'] ? full['value_unit'] : '';
+                        return '<span class="fw-semibold">' + $unit +''+ $value + '</span>';
                     }
                 },
                 {
@@ -129,7 +141,7 @@ $(function () {
             buttons: [
                 {
                     extend: 'collection',
-                    className: 'btn btn-label-secondary dropdown-toggle mx-3',
+                    className: 'btn btn-label-secondary dropdown-toggle mx-3 bg-custom-black text-white',
                     text: '<i class="ti ti-screen-share me-1 ti-xs"></i>Export',
                     buttons: [
                         {
@@ -268,8 +280,8 @@ $(function () {
                     ]
                 },
                 {
-                    text: '<i class="ti ti-plus me-0 me-sm-1 ti-xs"></i><span class="d-none d-sm-inline-block">Add new Configuration</span>',
-                    className: 'add-new btn btn-primary',
+                    text: '<i class="ti ti-plus me-0 me-sm-1 ti-xs"></i><span class="d-none d-sm-inline-block">Add new '+configuration_type+'</span>',
+                    className: 'add-new btn btn-primary Rectangle_4',
                     attr: {
                         'data-bs-toggle': 'offcanvas',
                         'data-bs-target': '#offcanvasAddConfiguration'
@@ -277,38 +289,38 @@ $(function () {
                 }
             ],
             // For responsive popup
-            responsive: {
-                details: {
-                    display: $.fn.dataTable.Responsive.display.modal({
-                        header: function (row) {
-                            var data = row.data();
-                            return 'Details of ' + data['value'];
-                        }
-                    }),
-                    type: 'column',
-                    renderer: function (api, rowIdx, columns) {
-                        var data = $.map(columns, function (col, i) {
-                            return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
-                                ? '<tr data-dt-row="' +
-                                col.rowIndex +
-                                '" data-dt-column="' +
-                                col.columnIndex +
-                                '">' +
-                                '<td>' +
-                                col.title +
-                                ':' +
-                                '</td> ' +
-                                '<td>' +
-                                col.data +
-                                '</td>' +
-                                '</tr>'
-                                : '';
-                        }).join('');
+            // responsive: {
+            //     details: {
+            //         display: $.fn.dataTable.Responsive.display.modal({
+            //             header: function (row) {
+            //                 var data = row.data();
+            //                 return 'Details of ' + data['value'];
+            //             }
+            //         }),
+            //         type: 'column',
+            //         renderer: function (api, rowIdx, columns) {
+            //             var data = $.map(columns, function (col, i) {
+            //                 return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
+            //                     ? '<tr data-dt-row="' +
+            //                     col.rowIndex +
+            //                     '" data-dt-column="' +
+            //                     col.columnIndex +
+            //                     '">' +
+            //                     '<td>' +
+            //                     col.title +
+            //                     ':' +
+            //                     '</td> ' +
+            //                     '<td>' +
+            //                     col.data +
+            //                     '</td>' +
+            //                     '</tr>'
+            //                     : '';
+            //             }).join('');
 
-                        return data ? $('<table class="table"/><tbody />').append(data) : false;
-                    }
-                }
-            },
+            //             return data ? $('<table class="table"/><tbody />').append(data) : false;
+            //         }
+            //     }
+            // },
         });
     }
 
@@ -331,54 +343,54 @@ $(function () {
 });
 
 // Validation & Phone mask
-(function () {
-    const phoneMaskList = document.querySelectorAll('.phone-mask'),
-        addNewUserForm = document.getElementById('addNewUserForm');
-
-    // Phone Number
-    if (phoneMaskList) {
-        phoneMaskList.forEach(function (phoneMask) {
-            new Cleave(phoneMask, {
-                phone: true,
-                phoneRegionCode: 'US'
-            });
-        });
-    }
-    // Add New User Form Validation
-    const fv = FormValidation.formValidation(addNewUserForm, {
-        fields: {
-            userFullname: {
-                validators: {
-                    notEmpty: {
-                        message: 'Please enter fullname '
-                    }
-                }
-            },
-            userEmail: {
-                validators: {
-                    notEmpty: {
-                        message: 'Please enter your email'
-                    },
-                    emailAddress: {
-                        message: 'The value is not a valid email address'
-                    }
-                }
-            }
-        },
-        plugins: {
-            trigger: new FormValidation.plugins.Trigger(),
-            bootstrap5: new FormValidation.plugins.Bootstrap5({
-                // Use this for enabling/changing valid/invalid class
-                eleValidClass: '',
-                rowSelector: function (field, ele) {
-                    // field is the field name & ele is the field element
-                    return '.mb-3';
-                }
-            }),
-            submitButton: new FormValidation.plugins.SubmitButton(),
-            // Submit the form when all fields are valid
-            // defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
-            autoFocus: new FormValidation.plugins.AutoFocus()
-        }
-    });
-})();
+// (function () {
+//     const phoneMaskList = document.querySelectorAll('.phone-mask'),
+//         addNewUserForm = document.getElementById('addNewUserForm');
+//
+//     // Phone Number
+//     if (phoneMaskList) {
+//         phoneMaskList.forEach(function (phoneMask) {
+//             new Cleave(phoneMask, {
+//                 phone: true,
+//                 phoneRegionCode: 'US'
+//             });
+//         });
+//     }
+//     // Add New User Form Validation
+//     const fv = FormValidation.formValidation(addNewUserForm, {
+//         fields: {
+//             userFullname: {
+//                 validators: {
+//                     notEmpty: {
+//                         message: 'Please enter fullname '
+//                     }
+//                 }
+//             },
+//             userEmail: {
+//                 validators: {
+//                     notEmpty: {
+//                         message: 'Please enter your email'
+//                     },
+//                     emailAddress: {
+//                         message: 'The value is not a valid email address'
+//                     }
+//                 }
+//             }
+//         },
+//         plugins: {
+//             trigger: new FormValidation.plugins.Trigger(),
+//             bootstrap5: new FormValidation.plugins.Bootstrap5({
+//                 // Use this for enabling/changing valid/invalid class
+//                 eleValidClass: '',
+//                 rowSelector: function (field, ele) {
+//                     // field is the field name & ele is the field element
+//                     return '.mb-3';
+//                 }
+//             }),
+//             submitButton: new FormValidation.plugins.SubmitButton(),
+//             // Submit the form when all fields are valid
+//             // defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
+//             autoFocus: new FormValidation.plugins.AutoFocus()
+//         }
+//     });
+// })();

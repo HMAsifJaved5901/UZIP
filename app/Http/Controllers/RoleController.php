@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -15,27 +16,18 @@ class RoleController extends Controller
 {
     public function index()
     {
-        $roles = Role::where('is_deleted',0)->get();
-        $modelPermission = DB::table('permissions')
-            ->select('id', 'module', 'slug', 'guard_name')
-            ->whereNotIn('module', ['Permission', 'Role'])
-            ->orderBy('module')
-            ->get();
+        $roles = Role::where('is_deleted',0)->where('guard_name','Admin')->get();
         $permissions = [];
-        foreach ($modelPermission as $row) {
-            $permissions[$row->module][] = [
-                'id' => $row->id,
-                'slug' => $row->slug,
-                'guard_name' => $row->guard_name,
-            ];
-        }
-
-        return view('role-permission.role.index', ['data' => $roles, 'permissions' => $permissions]);
+        return view('role-permission.role.index',
+            [
+                'roles' => $roles,
+                'permissions' => $permissions
+            ]);
     }
 
     public function save(Request $request)
     {
-        $isUpdate = $request->has('id'); // Check if this is an update operation
+        $isUpdate = $request->filled('id'); // Check if this is an update operation
         $roleId = $request->input('id'); // Role ID for update
 
         // Validation rules
@@ -76,6 +68,10 @@ class RoleController extends Controller
                 ]);
             }
 
+            // Update or set r_code to 4-digit zero-padded ID
+            $role->r_code = str_pad($role->id, 4, '0', STR_PAD_LEFT);
+            $role->save();
+
             // Handle permissions for non-admin roles
             if ($guard_name !== 'admin') {
                 $permissionsArray = $request->input('permissions', []); // Default to an empty array if no permissions
@@ -88,21 +84,16 @@ class RoleController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'An error occurred while saving the role: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred while saving the designation: ' . $e->getMessage());
         }
 
-        return redirect()->route('roles.index')->with('success', $isUpdate ? 'Role updated successfully.' : 'Role created and permissions assigned successfully.');
+        return redirect()->route('roles.index')->with('success', $isUpdate ? 'Designation updated successfully.' : 'Designation created successfully.');
     }
 
 
     public function edit()
     {
         return view('role-permission.role.update');
-    }
-
-    public function update()
-    {
-
     }
 
     public function destroy($id)
@@ -114,12 +105,12 @@ class RoleController extends Controller
         $role->status = $status;
         $role->save();
 
-        return response()->json(['message' => 'Role soft deleted successfully.', 200, 'data'=>$role]);
+        return response()->json(['message' => 'Designation deleted successfully.', 200, 'data'=>$role]);
     }
 
-    public function getRoleList(Request $request)
+    public function getList(Request $request)
     {
-        $roles = Role::all();
+        $roles = Role::where('guard_name','web')->get();
         $formattedRoles = $roles->map(function ($role) {
             $createdDate = Carbon::parse($role->created_at)->format('d M Y, g:i A');
             return [
@@ -135,7 +126,7 @@ class RoleController extends Controller
         return response()->json(['data' => $formattedRoles]);
     }
 
-    public function fetchRoleById(Request $request)
+    public function getById(Request $request)
     {
         $role = Role::where('id',$request->id)->select('id','name')->first();
         return response()->json(['data' => $role]);

@@ -105,7 +105,8 @@
             </div>
             <!-- Offcanvas to add new user -->
             <div
-                    class="offcanvas offcanvas-end"
+                    {{--class="offcanvas offcanvas-end"--}}
+                    class="offcanvas custom-centered-modal"
                     tabindex="-1"
                     id="offcanvasAddUser"
                     aria-labelledby="offcanvasAddUserLabel"

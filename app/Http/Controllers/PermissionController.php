@@ -1,18 +1,24 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Console\Commands\GeneratePermissions;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Artisan;
 
 class PermissionController extends Controller
 {
     public function index()
     {
+        // Run the GeneratePermissions console command
+        Artisan::call('generate:permissions');
+
         $model = DB::table('permissions')
             ->select('id','module', 'name', 'slug', 'guard_name')
+            ->where('guard_name', 'web')
             ->whereNotIn('module',['Permission','Role'])
             ->orderBy('module')
             ->get();
@@ -28,6 +34,7 @@ class PermissionController extends Controller
 
         return view('role-permission.permission.index',['data'=>$permissions]);
     }
+
     public function create()
     {
         return view('role-permission.permission.create');

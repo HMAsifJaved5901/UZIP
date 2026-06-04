@@ -37,10 +37,9 @@ $(function () {
                 // columns according to JSON
                 {data: ''},
                 {data: 'company_name'},
-                {data: 'parent_company'},
-                {data: 'company_code'},
-                {data: 'company_address'},
-                {data: 'company_logo'},
+                // {data: 'business'},
+                // {data: 'company_code'},
+                // {data: 'company_address'},
                 {data: 'is_active'},
                 {data: 'action'}
             ],
@@ -96,43 +95,34 @@ $(function () {
                         return $row_output;
                     }
                 },
-                {
-                    // parent company
-                    targets: 2,
-                    render: function (data, type, full, meta) {
-                        var $parent_company = full['parent_company'];
-                        return "<span class='text-truncate d-flex align-items-center'>" + $parent_company + '</span>';
-                    }
-                },
-                {
-                    // company code
-                    targets: 3,
-                    render: function (data, type, full, meta) {
-                        var $company_code = full['company_code'];
-                        return "<span class='text-truncate d-flex align-items-center'>" + $company_code + '</span>';
-                    }
-                },
-                {
-                    // address
-                    targets: 4,
-                    render: function (data, type, full, meta) {
-                        var $company_address = full['company_address'];
-
-                        return '<span class="fw-semibold">' + $company_address + '</span>';
-                    }
-                },
-                {
-                    // logo
-                    targets: 5,
-                    render: function (data, type, full, meta) {
-                        var $company_logo = full['company_logo'];
-
-                        return '<span class="fw-semibold">' + $company_logo + '</span>';
-                    }
-                },
+                // {
+                //     // company code
+                //     targets: 2,
+                //     render: function (data, type, full, meta) {
+                //         var $business = full['business'];
+                //         return "<span class='text-truncate d-flex align-items-center'>" + $business + '</span>';
+                //     }
+                // },
+                // {
+                //     // company code
+                //     targets: 3,
+                //     render: function (data, type, full, meta) {
+                //         var $company_code = full['company_code'];
+                //         return "<span class='text-truncate d-flex align-items-center'>" + $company_code + '</span>';
+                //     }
+                // },
+                // {
+                //     // address
+                //     targets: 4,
+                //     render: function (data, type, full, meta) {
+                //         var $company_address = full['company_address'];
+                //
+                //         return '<span class="fw-semibold">' + $company_address + '</span>';
+                //     }
+                // },
                 {
                     // Company Status
-                    targets: 6,
+                    targets: 2,
                     render: function (data, type, full, meta) {
                         var $is_active = full['is_active'];
 
@@ -155,15 +145,15 @@ $(function () {
                         var $companyId = full['id'];
                         var $deleted = full['is_deleted'];
                         var $status = full['is_active'];
-                        var statusText = $status === 1 ? 'Suspend' : 'Activate';
+                        var statusText = $status === 1 ? 'Disable' : 'Activate';
                         var deletedText = $deleted === 0 ? '<i class="ti ti-trash ti-sm mx-2"></i>' : '<i class="fas fa-trash-restore-alt ti-sm mx-2"></i>';
                         var $action = $deleted === 1 ? 'restore' : 'delete';
                         var deletedView = $deleted === 0 ? 'block' : 'none';
                         return (
-                            '<div class="d-flex align-items-center">' +
-                            '<a href="javascript:void(0)" style="display: '+deletedView+'" id="update_company' + $companyId + '" data-company_id="' + $companyId + '" tabindex="0" aria-controls="DataTables_Table_0" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAddCompany" class="text-body"><i class="ti ti-edit ti-sm me-2"></i></a>' +
-                            '<a href="javascript:;" id="delete_company' + $companyId + '" data-company_id="' + $companyId + '" data-action_type="'+$action+'" class="text-body delete-record">'+deletedText+'</a>' +
-                            '<a href="javascript:;" style="display: '+deletedView+'" data-company_id="' + $companyId + '" class="update-status" id="status' + $companyId + '" >' + statusText + '</a>' +
+                            '<div class="d-flex align-items-center justify-content-end">' +
+                            '<a href="javascript:void(0)" style="display: '+deletedView+'" id="update_company' + $companyId + '" data-company_id="' + $companyId + '" tabindex="0" aria-controls="DataTables_Table_0" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAddCompany" class="text-body btn-edit"><i class="ti ti-edit ti-sm me-2"></i></a>' +
+                            '<a href="javascript:;" id="delete_company' + $companyId + '" data-company_id="' + $companyId + '" data-action_type="'+$action+'" class="text-body delete-record btn-delete">'+deletedText+'</a>' +
+                            '<a href="javascript:;" style="display: '+deletedView+'" data-company_id="' + $companyId + '" class="update-status btn-update-status" id="status' + $companyId + '" >' + statusText + '</a>' +
                             '</div>' +
                             '</div>'
                         );
@@ -189,7 +179,7 @@ $(function () {
             buttons: [
                 {
                     extend: 'collection',
-                    className: 'btn btn-label-secondary dropdown-toggle mx-3',
+                    className: 'btn btn-label-secondary dropdown-toggle mx-3 bg-custom-black text-white',
                     text: '<i class="ti ti-screen-share me-1 ti-xs"></i>Export',
                     buttons: [
                         {
@@ -329,7 +319,7 @@ $(function () {
                 },
                 {
                     text: '<i class="ti ti-plus me-0 me-sm-1 ti-xs"></i><span class="d-none d-sm-inline-block">Add New Company</span>',
-                    className: 'add-new btn btn-primary',
+                    className: 'add-new btn btn-primary Rectangle_4',
                     attr: {
                         'data-bs-toggle': 'offcanvas',
                         'data-bs-target': '#offcanvasAddCompany'
@@ -337,42 +327,42 @@ $(function () {
                 }
             ],
             // For responsive popup
-            responsive: {
-                details: {
-                    display: $.fn.dataTable.Responsive.display.modal({
-                        header: function (row) {
-                            var data = row.data();
-                            return 'Details of ' + data['full_name'];
-                        }
-                    }),
-                    type: 'column',
-                    renderer: function (api, rowIdx, columns) {
-                        var data = $.map(columns, function (col, i) {
-                            return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
-                                ? '<tr data-dt-row="' +
-                                col.rowIndex +
-                                '" data-dt-column="' +
-                                col.columnIndex +
-                                '">' +
-                                '<td>' +
-                                col.title +
-                                ':' +
-                                '</td> ' +
-                                '<td>' +
-                                col.data +
-                                '</td>' +
-                                '</tr>'
-                                : '';
-                        }).join('');
+            // responsive: {
+            //     details: {
+            //         display: $.fn.dataTable.Responsive.display.modal({
+            //             header: function (row) {
+            //                 var data = row.data();
+            //                 return 'Details of ' + data['full_name'];
+            //             }
+            //         }),
+            //         type: 'column',
+            //         renderer: function (api, rowIdx, columns) {
+            //             var data = $.map(columns, function (col, i) {
+            //                 return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
+            //                     ? '<tr data-dt-row="' +
+            //                     col.rowIndex +
+            //                     '" data-dt-column="' +
+            //                     col.columnIndex +
+            //                     '">' +
+            //                     '<td>' +
+            //                     col.title +
+            //                     ':' +
+            //                     '</td> ' +
+            //                     '<td>' +
+            //                     col.data +
+            //                     '</td>' +
+            //                     '</tr>'
+            //                     : '';
+            //             }).join('');
 
-                        return data ? $('<table class="table"/><tbody />').append(data) : false;
-                    }
-                }
-            },
+            //             return data ? $('<table class="table"/><tbody />').append(data) : false;
+            //         }
+            //     }
+            // },
             initComplete: function () {
                 // Adding status filter once table initialized
                 this.api()
-                    .columns(6)
+                    .columns(2)
                     .every(function () {
                         var column = this;
                         var select = $(

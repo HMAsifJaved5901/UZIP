@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
+use App\Models\Business;
 use App\Http\Requests\Companies\Index;
 use App\Http\Requests\Companies\Show;
 use App\Http\Requests\Companies\Create;
@@ -31,20 +32,19 @@ class CompanyController extends Controller
     public function index(Index $request)
     {
         return view('pages.companies.index', [
-            'companies' => Company::where('parent_id',0)->get()
+            'companies' => Company::where('id',1)->get()
         ]);
     }
 
-    public function companyIndex(Request $request)
+    public function dataTableList(Request $request)
     {
         $company_model = DB::table('companies as c1')
             ->select(
                 'c1.id',
-                DB::raw('(SELECT cr.company_name FROM companies cr WHERE cr.id = c1.parent_id) as parent_company'),
+                DB::raw('(SELECT cr.name FROM businesses cr WHERE cr.id = c1.business_id) as business'),
                 'c1.company_name',
                 'c1.company_code',
                 'c1.company_address',
-                'c1.company_logo',
                 'c1.is_active',
                 'c1.is_deleted'
             )
@@ -52,11 +52,10 @@ class CompanyController extends Controller
         $formattedCompany = $company_model->map(function ($company) {
             return [
                 'id' => $company->id,
+                'business' => $company->business,
                 'company_name' => $company->company_name,
-                'parent_company' => $company->parent_company,
                 'company_code' => $company->company_code,   // inner codes for multiple companies under single business
                 'company_address' => $company->company_address,
-                'company_logo' => $company->company_logo,   // inner codes for multiple companies under single business
                 'is_active' => $company->is_active,
                 'is_deleted' => $company->is_deleted
             ];
@@ -65,7 +64,7 @@ class CompanyController extends Controller
         return response()->json(['data' => $formattedCompany]);
     }
 
-    public function getCompanyById($id)
+    public function getById($id)
     {
         $company = Company::where('id', $id)->first();
         return response()->json(['data' => $company]);
@@ -74,10 +73,10 @@ class CompanyController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  Store $request
+     * @param  Request $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Store $request)
+    public function store(Request $request)
     {
         // Check if there is a file uploaded
         if ($request->hasFile('company_logo')) {
@@ -135,7 +134,7 @@ class CompanyController extends Controller
         }
     }
 
-    public function updateStatus(Request $request)
+    public function changeStatus(Request $request)
     {
         $request->validate([
             'company_id' => ['required', 'exists:companies,id'], // Ensure the user exists

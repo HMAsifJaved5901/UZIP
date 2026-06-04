@@ -9,16 +9,16 @@
                 </div>
             </div>
             <div class="card-datatable table-responsive">
-                <table class="datatables-station table border-top">
-                    <thead>
+                <table class="datatables-station table border-top custom-table-design">
+                    <thead class="bg-custom-black">
                     <tr>
                         <th></th>
-                        <th>Name</th>
+                        <th>Site</th>
                         <th>Code</th>
-                        <th>Company Name</th>
-                        <th>Manager</th>
-                        <th>Postal Address</th>
+                        <th>Company</th>
+                        <th>Address</th>
                         <th>Phone</th>
+                        <th>Opening Hours</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -27,13 +27,14 @@
             </div>
             <!-- Offcanvas to add new station -->
             <div
-                    class="offcanvas offcanvas-end"
+                    {{--class="offcanvas offcanvas-end"--}}
+                    class="offcanvas custom-centered-modal"
                     tabindex="-1"
                     id="offcanvasAddStation"
                     aria-labelledby="offcanvasAddStationLabel"
             >
                 <div class="offcanvas-header">
-                    <h5 id="offcanvasAddStationLabel" class="offcanvas-title">Add Gas Station</h5>
+                    <h5 id="offcanvasAddStationLabel" class="offcanvas-title">Add New Site</h5>
                     <button
                             type="button"
                             class="btn-close text-reset"
@@ -48,7 +49,7 @@
                         <input type="hidden" value="" name="id" id="station_id">
                         <input type="hidden" value="1" name="category_id" id="category_id">
                         <div class="mb-3">
-                            <label class="form-label" for="add-station-name">Station Name</label>
+                            <label class="form-label" for="add-station-name">Name</label>
                             <input
                                     type="text"
                                     class="form-control"
@@ -56,10 +57,11 @@
                                     placeholder="2230 new yark Eve"
                                     name="name"
                                     aria-label="2230 new yark Eve"
+                                    required
                             />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" for="add-station-code">Station Code</label>
+                            <label class="form-label" for="add-station-code">Code</label>
                             <input
                                     type="text"
                                     class="form-control"
@@ -67,36 +69,31 @@
                                     placeholder="123QWE"
                                     name="code"
                                     aria-label="123QWE"
+                                    required
                             />
                         </div>
                         <div class="mb-4">
                             <label class="form-label" for="add-station-company">Select Company</label>
-                            <select id="add-station-company" class="form-select" name="company_id">
+                            <select id="add-station-company" class="form-select" name="company_id" required>
                                 <option value="basic">Select Company</option>
                                 @foreach($companies as $company)
                                     <option value="{{$company->id}}">{{$company->company_name}}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="mb-4">
-                            <label class="form-label" for="add-user-manager">Select Manager</label>
-                            <select id="add-user-manager" class="form-select" name="manager_id">
-                                <option value="">Select Manager</option>
-                            </select>
-                        </div>
                         <div class="mb-3">
-                            <label class="form-label" for="add-station-location">Station Postal Address</label>
+                            <label class="form-label" for="add-station-location">Postal Address</label>
                             <input
                                     type="text"
                                     class="form-control"
                                     id="add-station-location"
-                                    placeholder="Location"
+                                    placeholder="Address"
                                     name="location"
                                     aria-label="Location"
                             />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" for="add-station-latitude">Station Latitude</label>
+                            <label class="form-label" for="add-station-latitude">Latitude</label>
                             <input
                                     type="text"
                                     class="form-control"
@@ -107,7 +104,7 @@
                             />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" for="add-station-longitude">Station Longitude</label>
+                            <label class="form-label" for="add-station-longitude">Longitude</label>
                             <input
                                     type="text"
                                     class="form-control"
@@ -118,7 +115,7 @@
                             />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" for="add-station-phone">Station Phone</label>
+                            <label class="form-label" for="add-station-phone">Phone#</label>
                             <input
                                     type="text"
                                     class="form-control"
@@ -128,6 +125,14 @@
                                     aria-label="Phone"
                             />
                         </div>
+                        {{--<div class="mb-3">--}}
+                            {{--<label class="form-label" for="add-opening-hours">Point Of sale</label>--}}
+                            {{--<select id="add-pos_id" class="form-select" name="pos_id">--}}
+                                {{--@foreach($posCategories as $pos)--}}
+                                    {{--<option value="{{ $pos->id }}">{{ ucfirst($pos->name) }}</option>--}}
+                                {{--@endforeach--}}
+                            {{--</select>--}}
+                        {{--</div>--}}
                         <div class="mb-3">
                             <label class="form-label" for="add-opening-hours">Select opening Hours</label>
                             <select id="add-opening-hours" class="form-select" name="opening_hours">
@@ -150,6 +155,7 @@
         <script src="{{ asset('lib/assets/js/app-station-list.js') }}"></script>
         <div id="fetchStationRoute" data-url="{{ route('station.list') }}"></div>
         <div id="fetchStationViewRoute" data-url="{{ route('station.service.index', ':id') }}"></div>
+        <div id="fetchStationCashFlowViewRoute" data-url="{{ route('station.cash.flow.index', ':id') }}"></div>
 
         @if ($errors->any())
             <script>
@@ -187,12 +193,12 @@
                                 $('#add-station-name').val(station.name);
                                 $('#add-station-code').val(station.code);
                                 $('#add-station-company').val(station.company_id);
-                                 managerList(station.company_id,station.manager_id);
                                 $('#add-station-location').val(station.location);
                                 $('#add-station-latitude').val(station.latitude);
                                 $('#add-station-longitude').val(station.longitude);
                                 $('#add-station-phone').val(station.phone);
                                 $('#add-opening-hours').val(station.opening_hours);
+                                $('#add-pos_id').val(station.pos_id);
                             }
                         },
                         error: function (xhr) {
@@ -213,10 +219,10 @@
                 const action = $(this).data('action_type');
 
                 var btnTitle = (action === 'restore') ? "Sure to Proceed?" : "Are you sure?";
-                var btnText = (action === 'restore') ? "Please proceed to restore deleted data!" : "This Station won't be able to perform any action!";
-                var confirmBtnText = (action === 'restore') ? "Yes, restore it!" : "Yes, delete it!";
-                var SuccessTitle = (action === 'restore') ? "Restore!" : "Deleted!";
-                var SuccessText = (action === 'restore') ? "The Data has been restored.!" : "The Role has been deleted!";
+                var btnText = (action === 'restore') ? "Please proceed to Activate Suspended data!" : "This Station won't be able to perform any action!";
+                var confirmBtnText = (action === 'restore') ? "Yes, Activate it!" : "Yes, Suspend it!";
+                var SuccessTitle = (action === 'restore') ? "Activate!" : "Suspended!";
+                var SuccessText = (action === 'restore') ? "The Data has been Activated.!" : "The Role has been Suspended!";
 
                 Swal.fire({
                     title: btnTitle,
@@ -302,49 +308,6 @@
                 });
 
             });
-        </script>
-
-        <script>
-            document.getElementById('add-station-company').addEventListener('change', function () {
-                const companyId = this.value;
-                managerList(companyId,0);
-            });
-
-            function managerList(companyId, manager_id) {
-                if (companyId) {
-                    const managerDropdown = document.getElementById('add-user-manager');
-                    // Clear the manager dropdown
-                    managerDropdown.innerHTML = '<option value="">Select Manager</option>';
-                    // Make an AJAX call to fetch managers
-                    fetch('{{ route("get.managers") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({company_id: companyId})
-                    })
-                        .then(function (response) {
-                            return response.json(); // Convert response to JSON
-                        })
-                        .then(function (data) {
-                            // Populate the manager dropdown
-                            data.forEach(function (manager) {
-                                const option = document.createElement('option');
-                                option.value = manager.id;
-                                option.textContent = manager.name;
-                                managerDropdown.appendChild(option)
-                            });
-
-                            if (manager_id) {
-                                managerDropdown.value = manager_id; // Set the value of the dropdown
-                            }
-                        })
-                        .catch(function (error) {
-                            console.error('Error:', error); // Log errors
-                        });
-                }
-            }
         </script>
 
     </x-slot>

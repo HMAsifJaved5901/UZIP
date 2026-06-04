@@ -8,7 +8,7 @@
                 <script>
                     document.write(new Date().getFullYear());
                 </script>
-                , made with ❤️ by <a href="https://pixinvent.com" target="_blank" class="fw-semibold">UZIP</a>
+                , Developed by <a href="javascript:void(0)" target="_blank" class="fw-semibold">Technvantage Consulting</a>
             </div>
             <div style="display: none">
                 <a href="https://themeforest.net/licenses/standard" class="footer-link me-4" target="_blank"

@@ -6,12 +6,15 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "darkaonline/l5-swagger": "^9.0",
         "laravel/framework": "^11.9",
+        "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
-        "spatie/laravel-permission": "^6.9"
+        "league/fractal": "^0.20.2",
+        "spatie/laravel-permission": "^6.9",
+        "zircote/swagger-php": "^5.1"
     },
     "require-dev": {
-        "digitaldream/laracrud": "^4.0",
         "fakerphp/faker": "^1.23",
         "laravel/breeze": "^2.2",
         "laravel/pail": "^1.1",

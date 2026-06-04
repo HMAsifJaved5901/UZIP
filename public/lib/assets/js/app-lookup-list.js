@@ -22,9 +22,9 @@ $(function () {
     var dt_lookup_table = $('.datatables-lookup'),
         select2 = $('.select2'),
         userView = 'app-user-view-account.html',
-        deletedObj = {
-            0: {title: 'Pending', class: 'bg-label-warning'},
-            1: {title: 'Active', class: 'bg-label-success'}
+        statusObj = {
+            1: {is_deleted: 'Disabled', class: 'bg-label-warning'},
+            0: {is_deleted: 'Active', class: 'bg-label-success'}
         };
 
 
@@ -40,6 +40,7 @@ $(function () {
                 {data: ''},
                 {data: 'name'},
                 {data: 'description'},
+                {data: 'is_deleted'},
                 {data: ''}
             ],
             columnDefs: [
@@ -53,8 +54,7 @@ $(function () {
                     render: function (data, type, full, meta) {
                         return '';
                     }
-                },
-                {
+                },                {
                     // Lookup value
                     targets: 1,
                     render: function (data, type, full, meta) {
@@ -73,6 +73,20 @@ $(function () {
                     }
                 },
                 {
+                    // lookup Description
+                    targets: 3,
+                    render: function (data, type, full, meta) {
+                        var $is_deleted = full['is_deleted'];
+                        return (
+                            '<span class="badge ' +
+                            statusObj[$is_deleted].class +
+                            '" text-capitalized>' +
+                            statusObj[$is_deleted].is_deleted +
+                            '</span>'
+                        );
+                    }
+                },
+                {
                     // Actions
                     targets: -1,
                     title: 'Actions',
@@ -83,10 +97,11 @@ $(function () {
                         var $deleted = full['is_deleted'];
                         var deletedText = $deleted === 0 ? '<i class="ti ti-trash ti-sm mx-2"></i>' : '<i class="fas fa-trash-restore-alt ti-sm mx-2"></i>';
                         var editText = $deleted === 0 ? '<i class="ti ti-edit ti-sm me-2"></i>' : '';
+                        var $action = $deleted === 1 ? 'restore' : 'delete';
                         return (
-                            '<div class="d-flex align-items-center">' +
-                            '<a href="javascript:void(0)" id="update_lookup' + $id + '" data-lookupid="' + $id + '" tabindex="0" aria-controls="DataTables_Table_0" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAddLookup" class="text-body">'+editText+'</a>' +
-                            '<a href="javascript:;" id="delete_lookup' + $id + '" data-lookupid="' + $id + '" class="text-body delete-record">'+deletedText+'</a>' +
+                            '<div class="d-flex align-items-center justify-content-end">' +
+                            '<a href="javascript:void(0)" id="update_lookup' + $id + '" data-lookupid="' + $id + '" tabindex="0" aria-controls="DataTables_Table_0" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAddLookup" class="text-body btn-edit">'+editText+'</a>' +
+                            '<a href="javascript:;" data-action_type="' + $action + '" id="delete_lookup' + $id + '" data-lookupid="' + $id + '" class="text-body delete-record btn-delete">'+deletedText+'</a>' +
                             '</div>' +
                             '</div>'
                         );
@@ -112,7 +127,7 @@ $(function () {
             buttons: [
                 {
                     extend: 'collection',
-                    className: 'btn btn-label-secondary dropdown-toggle mx-3',
+                    className: 'btn btn-label-secondary dropdown-toggle mx-3 bg-custom-black text-white',
                     text: '<i class="ti ti-screen-share me-1 ti-xs"></i>Export',
                     buttons: [
                         {
@@ -252,7 +267,7 @@ $(function () {
                 },
                 {
                     text: '<i class="ti ti-plus me-0 me-sm-1 ti-xs"></i><span class="d-none d-sm-inline-block">Add new '+lookup_type+'</span>',
-                    className: 'add-new btn btn-primary',
+                    className: 'add-new btn btn-primary Rectangle_4',
                     attr: {
                         'data-bs-toggle': 'offcanvas',
                         'data-bs-target': '#offcanvasAddLookup'
@@ -260,38 +275,68 @@ $(function () {
                 }
             ],
             // For responsive popup
-            responsive: {
-                details: {
-                    display: $.fn.dataTable.Responsive.display.modal({
-                        header: function (row) {
-                            var data = row.data();
-                            return 'Details of ' + data['value'];
-                        }
-                    }),
-                    type: 'column',
-                    renderer: function (api, rowIdx, columns) {
-                        var data = $.map(columns, function (col, i) {
-                            return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
-                                ? '<tr data-dt-row="' +
-                                col.rowIndex +
-                                '" data-dt-column="' +
-                                col.columnIndex +
-                                '">' +
-                                '<td>' +
-                                col.title +
-                                ':' +
-                                '</td> ' +
-                                '<td>' +
-                                col.data +
-                                '</td>' +
-                                '</tr>'
-                                : '';
-                        }).join('');
+            // responsive: {
+            //     details: {
+            //         display: $.fn.dataTable.Responsive.display.modal({
+            //             header: function (row) {
+            //                 var data = row.data();
+            //                 return 'Details of ' + data['value'];
+            //             }
+            //         }),
+            //         type: 'column',
+            //         renderer: function (api, rowIdx, columns) {
+            //             var data = $.map(columns, function (col, i) {
+            //                 return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
+            //                     ? '<tr data-dt-row="' +
+            //                     col.rowIndex +
+            //                     '" data-dt-column="' +
+            //                     col.columnIndex +
+            //                     '">' +
+            //                     '<td>' +
+            //                     col.title +
+            //                     ':' +
+            //                     '</td> ' +
+            //                     '<td>' +
+            //                     col.data +
+            //                     '</td>' +
+            //                     '</tr>'
+            //                     : '';
+            //             }).join('');
 
-                        return data ? $('<table class="table"/><tbody />').append(data) : false;
-                    }
-                }
-            },
+            //             return data ? $('<table class="table"/><tbody />').append(data) : false;
+            //         }
+            //     }
+            // },
+            initComplete: function () {
+                // Adding status filter once table initialized
+                this.api()
+                    .columns(3)
+                    .every(function () {
+                        var column = this;
+                        var select = $(
+                            '<select id="FilterService" class="form-select text-capitalize"><option value=""> Select Status </option></select>'
+                        )
+                            .appendTo('.lookup_status')
+                            .on('change', function () {
+                                var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                                column.search(val ? '^' + val + '$' : '', true, false).draw();
+                            });
+
+                        column
+                            .data()
+                            .unique()
+                            .sort()
+                            .each(function (d, j) {
+                                select.append(
+                                    '<option value="' +
+                                    statusObj[d].is_deleted +
+                                    '" class="text-capitalize">' +
+                                    statusObj[d].is_deleted +
+                                    '</option>'
+                                );
+                            });
+                    });
+            }
         });
     }
 

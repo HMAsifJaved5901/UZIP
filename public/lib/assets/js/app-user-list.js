@@ -21,7 +21,6 @@ $(function () {
     // Variable declaration for table
     var dt_user_table = $('.datatables-users'),
         select2 = $('.select2'),
-        userView = 'app-user-view-account.html',
         statusObj = {
             0: {title: 'Pending', class: 'bg-label-warning'},
             1: {title: 'Active', class: 'bg-label-success'},
@@ -31,7 +30,7 @@ $(function () {
     if (select2.length) {
         var $this = select2;
         $this.wrap('<div class="position-relative"></div>').select2({
-            placeholder: 'Select Country',
+            placeholder: 'Select Designation',
             dropdownParent: $this.parent()
         });
     }
@@ -41,6 +40,7 @@ $(function () {
         var dataFilePath = '';
         var viewStation = document.getElementById('fetchUserViewRoute').getAttribute('data-url');
         var usersRoute = document.getElementById('fetchUsersRoute').getAttribute('data-url');
+
         // console.log(usersRoute)
         // $.ajax({
         //     url: usersRoute, // Laravel route to get users
@@ -64,10 +64,10 @@ $(function () {
                 // columns according to JSON
                 {data: ''},
                 {data: 'first_name'},
-                {data: 'last_name'},
-                {data: 'ssn'},
                 {data: 'role'},
-                {data: 'station'},
+                {data: 'company'},
+                // {data: 'station'},
+                // {data: 'wage'},
                 {data: 'status'},
                 {data: 'action'}
             ],
@@ -88,9 +88,11 @@ $(function () {
                     targets: 1,
                     responsivePriority: 4,
                     render: function (data, type, full, meta) {
-                        var $name = full['first_name'],
+                        var $first_name = full['first_name'],
+                            $last_name = full['last_name'],
                             $email = full['email'],
                             $image = full['avatar'];
+                        var userView = viewStation.replace(':id', full['id']);
                         if ($image) {
                             // For Avatar image
                             var $output =
@@ -100,8 +102,7 @@ $(function () {
                             var stateNum = Math.floor(Math.random() * 6);
                             var states = ['success', 'danger', 'warning', 'info', 'primary', 'secondary'];
                             var $state = states[stateNum],
-                                $name = full['first_name'],
-                                $initials = $name.match(/\b\w/g) || [];
+                                $initials = $first_name.match(/\b\w/g) || [];
                             $initials = (($initials.shift() || '') + ($initials.pop() || '')).toUpperCase();
                             $output = '<span class="avatar-initial rounded-circle bg-label-' + $state + '">' + $initials + '</span>';
                         }
@@ -117,66 +118,55 @@ $(function () {
                             '<a href="' +
                             userView +
                             '" class="text-body text-truncate"><span class="fw-semibold">' +
-                            $name +
+                            $first_name + ' ' + $last_name +
                             '</span></a>' +
                             '<small class="text-muted">' +
                             $email +
                             '</small>' +
                             '</div>' +
                             '</div>';
+
                         return $row_output;
                     }
                 },
                 {
-                    // Plans
+                    // User Role
                     targets: 2,
                     render: function (data, type, full, meta) {
-                        var $last_name = full['last_name'];
-
-                        return '<span class="fw-semibold">' + $last_name + '</span>';
+                        var $role = full['role'];
+                        return "<span class='text-truncate d-flex align-items-center'><span class='badge badge-center rounded-pill bg-label-secondary w-px-30 h-px-30 me-2'><i class='ti ti-device-laptop ti-sm'></i></span>" + $role + '</span>';
                     }
                 },
                 {
-                    // Plans
                     targets: 3,
                     render: function (data, type, full, meta) {
-                        var $ssn = full['ssn'];
-
-                        return '<span class="fw-semibold">' + $ssn + '</span>';
+                        var $company = full['company'];
+                        return '<span class="text-truncate d-flex align-items-center">' + $company + '</span>';
                     }
                 },
-                {
-                    // User Role
-                    targets: 4,
-                    render: function (data, type, full, meta) {
-                        var $role = full['role'];
-                        var roleBadgeObj = {
-                            Subscriber:
-                                '<span class="badge badge-center rounded-pill bg-label-warning w-px-30 h-px-30 me-2"><i class="ti ti-user ti-sm"></i></span>',
-                            Author:
-                                '<span class="badge badge-center rounded-pill bg-label-success w-px-30 h-px-30 me-2"><i class="ti ti-circle-check ti-sm"></i></span>',
-                            Maintainer:
-                                '<span class="badge badge-center rounded-pill bg-label-primary w-px-30 h-px-30 me-2"><i class="ti ti-chart-pie-2 ti-sm"></i></span>',
-                            Manager:
-                                '<span class="badge badge-center rounded-pill bg-label-info w-px-30 h-px-30 me-2"><i class="ti ti-edit ti-sm"></i></span>',
-                            Admin:
-                                '<span class="badge badge-center rounded-pill bg-label-secondary w-px-30 h-px-30 me-2"><i class="ti ti-device-laptop ti-sm"></i></span>'
-                        };
-                        return "<span class='text-truncate d-flex align-items-center'>" + roleBadgeObj[$role] + $role + '</span>';
-                    }
-                },
-                {
-                    // Plans
-                    targets: 5,
-                    render: function (data, type, full, meta) {
-                        var $station = full['station'];
-
-                        return '<span class="fw-semibold">' + $station + '</span>';
-                    }
-                },
+                // {
+                //     targets: 4,
+                //     render: function (data, type, full, meta) {
+                //         var $stations = full['station'];
+                //         return '<div class="station-list">' + $stations.map(function (station) {
+                //             return '<div class="station-item d-flex align-items-center p-2 mb-2 bg-light rounded shadow-sm">'
+                //                 + '<i class="fas fa-map-marker-alt mr-2 text-primary"></i>'  // Icon for station
+                //                 + '<span class="text-truncate">' + station + '</span>'
+                //                 + '</div>';
+                //         }).join('') + '</div>';
+                //     }
+                // },
+                // {
+                //     // User Status
+                //     targets: 4,
+                //     render: function (data, type, full, meta) {
+                //         var $wage = full['wage'];
+                //         return '<span class="text-truncate d-flex align-items-center">' + $wage + '</span>';
+                //     }
+                // },
                 {
                     // User Status
-                    targets: 6,
+                    targets: 4,
                     render: function (data, type, full, meta) {
                         var $status = full['status'];
 
@@ -198,7 +188,7 @@ $(function () {
                     render: function (data, type, full, meta) {
                         var $userId = full['id'];
                         var $status = full['status'];
-                        var statusText = $status === 1 ? 'Suspend' : 'Activate';
+                        var statusText = $status === 1 ? 'Disable' : 'Activate';
                         var $deleted = full['is_deleted'];
                         var deletedText = $deleted === 0 ? '<i class="ti ti-trash ti-sm mx-2"></i>' : '<i class="fas fa-trash-restore-alt ti-sm mx-2"></i>';
                         var $action = $deleted === 1 ? 'restore' : 'delete';
@@ -206,11 +196,11 @@ $(function () {
 
                         var userView = viewStation.replace(':id', full['id']);
                         return (
-                            '<div class="d-flex align-items-center">' +
-                            '<a href="' + userView + '" style="display:' + deletedView + '" id="view_user' + $userId + '" class="text-body"><i class="ti ti-eye  ti-sm me-2"></i></a>' +
-                            '<a href="javascript:void(0)" style="display: ' + deletedView + '" id="update_user' + $userId + '" data-userid="' + $userId + '" tabindex="0" aria-controls="DataTables_Table_0" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAddUser" class="text-body"><i class="ti ti-edit ti-sm me-2"></i></a>' +
-                            '<a href="javascript:;" id="delete_user' + $userId + '" data-action_type="' + $action + '" data-user_id="' + $userId + '" class="text-body delete-record">' + deletedText + '</a>' +
-                            '<a href="javascript:;" style="display: ' + deletedView + '" data-user_id="' + $userId + '" class="update-status" id="status' + $userId + '" >' + statusText + '</a>' +
+                            '<div class="d-flex align-items-center justify-content-end">' +
+                            '<a href="' + userView + '" style="display:' + deletedView + '" id="view_user' + $userId + '" class="text-body btn-view"><i class="ti ti-eye  ti-sm"></i></a>' +
+                            '<a href="javascript:void(0)" style="display: ' + deletedView + '" id="update_user' + $userId + '" data-userid="' + $userId + '" tabindex="0" aria-controls="DataTables_Table_0"  data-mode="edit" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAddUser" class="text-body btn-edit"><i class="ti ti-edit ti-sm me-2"></i></a>' +
+                            '<a href="javascript:;" id="delete_user' + $userId + '" data-action_type="' + $action + '" data-user_id="' + $userId + '" class="text-body delete-record btn-delete">' + deletedText + '</a>' +
+                            '<a href="javascript:;" style="display: ' + deletedView + '" data-user_id="' + $userId + '" class="update-status btn-update-status" id="status' + $userId + '" >' + statusText + '</a>' +
                             '</div>' +
                             '</div>'
                         );
@@ -236,7 +226,7 @@ $(function () {
             buttons: [
                 {
                     extend: 'collection',
-                    className: 'btn btn-label-secondary dropdown-toggle mx-3',
+                    className: 'btn btn-label-secondary dropdown-toggle mx-3 bg-custom-black text-white',
                     text: '<i class="ti ti-screen-share me-1 ti-xs"></i>Export',
                     buttons: [
                         {
@@ -375,55 +365,56 @@ $(function () {
                     ]
                 },
                 {
-                    text: '<i class="ti ti-plus me-0 me-sm-1 ti-xs"></i><span class="d-none d-sm-inline-block">Add New User</span>',
-                    className: 'add-new btn btn-primary',
+                    text: '<i class="ti ti-plus me-0 me-sm-1 ti-xs"></i><span class="d-none d-sm-inline-block">Add Employee</span>',
+                    className: 'add-new btn btn-primary Rectangle_4',
                     attr: {
                         'data-bs-toggle': 'offcanvas',
-                        'data-bs-target': '#offcanvasAddUser'
+                        'data-bs-target': '#offcanvasAddUser',
+                        'data-mode': 'add'
                     }
                 }
             ],
             // For responsive popup
-            responsive: {
-                details: {
-                    display: $.fn.dataTable.Responsive.display.modal({
-                        header: function (row) {
-                            var data = row.data();
-                            return 'Details of ' + data['full_name'];
-                        }
-                    }),
-                    type: 'column',
-                    renderer: function (api, rowIdx, columns) {
-                        var data = $.map(columns, function (col, i) {
-                            return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
-                                ? '<tr data-dt-row="' +
-                                col.rowIndex +
-                                '" data-dt-column="' +
-                                col.columnIndex +
-                                '">' +
-                                '<td>' +
-                                col.title +
-                                ':' +
-                                '</td> ' +
-                                '<td>' +
-                                col.data +
-                                '</td>' +
-                                '</tr>'
-                                : '';
-                        }).join('');
+            // responsive: {
+            //     details: {
+            //         display: $.fn.dataTable.Responsive.display.modal({
+            //             header: function (row) {
+            //                 var data = row.data();
+            //                 return 'Detail of Employee';
+            //             }
+            //         }),
+            //         type: 'column',
+            //         renderer: function (api, rowIdx, columns) {
+            //             var data = $.map(columns, function (col, i) {
+            //                 return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
+            //                     ? '<tr data-dt-row="' +
+            //                     col.rowIndex +
+            //                     '" data-dt-column="' +
+            //                     col.columnIndex +
+            //                     '">' +
+            //                     '<td>' +
+            //                     col.title +
+            //                     ':' +
+            //                     '</td> ' +
+            //                     '<td>' +
+            //                     col.data +
+            //                     '</td>' +
+            //                     '</tr>'
+            //                     : '';
+            //             }).join('');
 
-                        return data ? $('<table class="table"/><tbody />').append(data) : false;
-                    }
-                }
-            },
+            //             return data ? $('<table class="table"/><tbody />').append(data) : false;
+            //         }
+            //     }
+            // },
             initComplete: function () {
                 // Adding role filter once table initialized
                 this.api()
-                    .columns(4)
+                    .columns(2)
                     .every(function () {
                         var column = this;
                         var select = $(
-                            '<select id="UserRole" class="form-select text-capitalize"><option value=""> Select Role </option></select>'
+                            '<select id="UserRole" class="form-select text-capitalize"><option value=""> Select Designation </option></select>'
                         )
                             .appendTo('.user_role')
                             .on('change', function () {
@@ -439,31 +430,9 @@ $(function () {
                                 select.append('<option value="' + d + '">' + d + '</option>');
                             });
                     });
-                // Adding plan filter once table initialized
-                this.api()
-                    .columns(4)
-                    .every(function () {
-                        var column = this;
-                        var select = $(
-                            '<select id="UserPlan" class="form-select text-capitalize"><option value=""> Select Plan </option></select>'
-                        )
-                            .appendTo('.user_plan')
-                            .on('change', function () {
-                                var val = $.fn.dataTable.util.escapeRegex($(this).val());
-                                column.search(val ? '^' + val + '$' : '', true, false).draw();
-                            });
-
-                        column
-                            .data()
-                            .unique()
-                            .sort()
-                            .each(function (d, j) {
-                                select.append('<option value="' + d + '">' + d + '</option>');
-                            });
-                    });
                 // Adding status filter once table initialized
                 this.api()
-                    .columns(6)
+                    .columns(4)
                     .every(function () {
                         var column = this;
                         var select = $(

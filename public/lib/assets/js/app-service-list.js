@@ -37,8 +37,8 @@ $(function () {
                 // columns according to JSON
                 {data: ''},
                 {data: 'name'},
+                // {data: 'code'},
                 {data: 'description'},
-                {data: 'category_name'},
                 {data: 'is_active'},
                 {data: ''}
             ],
@@ -94,26 +94,26 @@ $(function () {
                         return $row_output;
                     }
                 },
+                // {
+                //     // Code
+                //     targets: 2,
+                //     render: function (data, type, full, meta) {
+                //         var $code = full['code'];
+                //         return "<span class='text-truncate d-flex align-items-center'>" + $code + '</span>';
+                //     }
+                // },
                 {
-                    // User Role
+                    // Description
                     targets: 2,
                     render: function (data, type, full, meta) {
-                        var $sdescription = full['description'];
-                        return "<span class='text-truncate d-flex align-items-center'>" + $sdescription + '</span>';
-                    }
-                },
-                {
-                    // User Role
-                    targets: 3,
-                    render: function (data, type, full, meta) {
-                        var $station_category = full['category_name'];
-                        return "<span class='text-truncate d-flex align-items-center'>" + $station_category + '</span>';
+                        var $description = full['description'];
+                        return "<span class='text-truncate d-flex align-items-center'>" + $description + '</span>';
                     }
                 },
 
                 {
                     // Service Status
-                    targets: 4,
+                    targets: 3,
                     render: function (data, type, full, meta) {
                         var $is_active = full['is_active'];
 
@@ -136,15 +136,15 @@ $(function () {
                         var $serviceId = full['id'];
                         var $deleted = full['is_deleted'];
                         var $status = full['is_active'];
-                        var statusText = $status === 1 ? 'Suspend' : 'Activate';
+                        var statusText = $status === 1 ? 'Disable' : 'Activate';
                         var deletedText = $deleted === 0 ? '<i class="ti ti-trash ti-sm mx-2"></i>' : '<i class="fas fa-trash-restore-alt ti-sm mx-2"></i>';
                         var $action = $deleted === 1 ? 'restore' : 'delete';
                         var deletedView = $deleted === 0 ? 'block' : 'none';
                         return (
-                            '<div class="d-flex align-items-center">' +
-                            '<a href="javascript:void(0)" style="display: '+deletedView+'" id="update_station' + $serviceId + '" data-service_id="' + $serviceId + '" tabindex="0" aria-controls="DataTables_Table_0" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAddService" class="text-body"><i class="ti ti-edit ti-sm me-2"></i></a>' +
-                            '<a href="javascript:;" id="delete_station' + $serviceId + '" data-service_id="' + $serviceId + '" data-action_type="'+$action+'" class="text-body delete-record">'+deletedText+'</a>' +
-                            '<a href="javascript:;" style="display: '+deletedView+'" data-service_id="' + $serviceId + '" class="update-status" id="status' + $serviceId + '" >' + statusText + '</a>' +
+                            '<div class="d-flex align-items-center justify-content-end">' +
+                            '<a href="javascript:void(0)" style="display: '+deletedView+'" id="update_station' + $serviceId + '" data-service_id="' + $serviceId + '" tabindex="0" aria-controls="DataTables_Table_0" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAddService" class="text-body btn-edit"><i class="ti ti-edit ti-sm me-2"></i></a>' +
+                            '<a href="javascript:;" id="delete_station' + $serviceId + '" data-service_id="' + $serviceId + '" data-action_type="'+$action+'" class="text-body delete-record btn-delete">'+deletedText+'</a>' +
+                            '<a href="javascript:;" style="display: '+deletedView+'" data-service_id="' + $serviceId + '" class="update-status btn-update-status" id="status' + $serviceId + '" >' + statusText + '</a>' +
                             '</div>' +
                             '</div>'
                         );
@@ -170,7 +170,7 @@ $(function () {
             buttons: [
                 {
                     extend: 'collection',
-                    className: 'btn btn-label-secondary dropdown-toggle mx-3',
+                    className: 'btn btn-label-secondary dropdown-toggle mx-3 bg-custom-black text-white',
                     text: '<i class="ti ti-screen-share me-1 ti-xs"></i>Export',
                     buttons: [
                         {
@@ -310,7 +310,7 @@ $(function () {
                 },
                 {
                     text: '<i class="ti ti-plus me-0 me-sm-1 ti-xs"></i><span class="d-none d-sm-inline-block">Add New Service</span>',
-                    className: 'add-new btn btn-primary',
+                    className: 'add-new btn btn-primary Rectangle_4',
                     attr: {
                         'data-bs-toggle': 'offcanvas',
                         'data-bs-target': '#offcanvasAddService'
@@ -318,42 +318,42 @@ $(function () {
                 }
             ],
             // For responsive popup
-            responsive: {
-                details: {
-                    display: $.fn.dataTable.Responsive.display.modal({
-                        header: function (row) {
-                            var data = row.data();
-                            return 'Details of ' + data['full_name'];
-                        }
-                    }),
-                    type: 'column',
-                    renderer: function (api, rowIdx, columns) {
-                        var data = $.map(columns, function (col, i) {
-                            return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
-                                ? '<tr data-dt-row="' +
-                                col.rowIndex +
-                                '" data-dt-column="' +
-                                col.columnIndex +
-                                '">' +
-                                '<td>' +
-                                col.title +
-                                ':' +
-                                '</td> ' +
-                                '<td>' +
-                                col.data +
-                                '</td>' +
-                                '</tr>'
-                                : '';
-                        }).join('');
+            // responsive: {
+            //     details: {
+            //         display: $.fn.dataTable.Responsive.display.modal({
+            //             header: function (row) {
+            //                 var data = row.data();
+            //                 return 'Details of ' + data['full_name'];
+            //             }
+            //         }),
+            //         type: 'column',
+            //         renderer: function (api, rowIdx, columns) {
+            //             var data = $.map(columns, function (col, i) {
+            //                 return col.title !== '' // ? Do not show row in modal popup if title is blank (for check box)
+            //                     ? '<tr data-dt-row="' +
+            //                     col.rowIndex +
+            //                     '" data-dt-column="' +
+            //                     col.columnIndex +
+            //                     '">' +
+            //                     '<td>' +
+            //                     col.title +
+            //                     ':' +
+            //                     '</td> ' +
+            //                     '<td>' +
+            //                     col.data +
+            //                     '</td>' +
+            //                     '</tr>'
+            //                     : '';
+            //             }).join('');
 
-                        return data ? $('<table class="table"/><tbody />').append(data) : false;
-                    }
-                }
-            },
+            //             return data ? $('<table class="table"/><tbody />').append(data) : false;
+            //         }
+            //     }
+            // },
             initComplete: function () {
                 // Adding status filter once table initialized
                 this.api()
-                    .columns(4)
+                    .columns(3)
                     .every(function () {
                         var column = this;
                         var select = $(

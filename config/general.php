@@ -6,12 +6,25 @@ return [
         '24/7'   => '24/7'
     ],
 
+    'value_units' => [
+        '$'   => '$',
+        '%'   => '%'
+    ],
+
     'configuration_list' => [
-        'Fuel'   => 'Gas Station Wage',
-        'Convenience Store'   => 'Convenience Store Wage',
-        'ATM'   => 'ATM Manager Wage',
-        'Mechanic Shop'   => 'Mechanic Shop Wage',
-        'Restaurant'   => 'Restaurant Wage',
-        'Lottery'   => 'Lottery Manager Wage',
+        'wages'   => 'Wages',
+        'commission'   => 'Commission',
+        'discount_reward'   => 'Discount/Rewards',
+        'payment_charges'   => 'Payment Charges'
+    ],
+
+    'fuel_type' => [
+        'diesel'   => 'Diesel',
+        'gasoline'   => 'Gasoline',
+        'octane'   => 'Octane',
+        'lpg'   => 'LPG',
+        'premium'   => 'Premium',
+        'hybrid'   => 'Hybrid',
+        'premium_gas'   => 'Premium gas',
     ],
 ];

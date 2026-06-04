@@ -5880,6 +5880,8 @@ textarea.form-control-lg {
   outline: 0;
   transition: transform 0.25s ease-in-out;
 }
+
+
 @media (prefers-reduced-motion: reduce) {
   .offcanvas {
     transition: none;

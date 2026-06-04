@@ -33,7 +33,7 @@ class CategoryController extends Controller
             ]);
     }
 
-    public function categoryIndex(Index $request)
+    public function dataTableList(Index $request)
     {
         $model = DB::table('categories as c1')
             ->select(
@@ -62,7 +62,7 @@ class CategoryController extends Controller
         return response()->json(['data' => $formattedModel]);
     }
 
-    public function getCategoryById($id)
+    public function getById($id)
     {
         $model = Category::find($id);
 

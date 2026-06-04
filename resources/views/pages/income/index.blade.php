@@ -9,16 +9,16 @@
                 </div>
             </div>
             <div class="card-datatable table-responsive">
-                <table class="datatables-income table border-top">
-                    <thead>
+                <table class="datatables-income table border-top custom-table-design">
+                    <thead class="bg-custom-black">
                     <tr>
                         <th></th>
-                        <th>Date</th>
                         <th>Station</th>
-                        <th>Service</th>
-                        <th>Category</th>
-                        <th>Amount</th>
-                        <th>Description</th>
+                        <th>Date</th>
+                        <th>Total Fuel Sale</th>
+                        <th>Total Non Sale</th>
+                        <th>Net Tax</th>
+                        <th>Net Sale</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -27,7 +27,8 @@
             </div>
             <!-- Offcanvas to add new income -->
             <div
-                    class="offcanvas offcanvas-end"
+                    {{--class="offcanvas offcanvas-end"--}}
+                    class="offcanvas custom-centered-modal"
                     tabindex="-1"
                     id="offcanvasAddIncome"
                     aria-labelledby="offcanvasAddIncomeLabel"
@@ -57,9 +58,9 @@
                             />
                         </div>
                         <div class="mb-4">
-                            <label class="form-label" for="add-income-station">Station</label>
+                            <label class="form-label" for="add-income-station">Site</label>
                             <select id="add-income-station" class="form-select" name="station_id">
-                                <option value="basic">Select Station</option>
+                                <option value="basic">Select Site</option>
                                 @foreach($stations as $station)
                                     <option value="{{$station->id}}">{{$station->name}}</option>
                                 @endforeach
@@ -69,20 +70,32 @@
                             <label class="form-label" for="add-income-station-service">Service</label>
                             <select id="add-income-station-service" class="form-select" name="service_id">
                                 <option value="">Select Service</option>
-                                @foreach($services as $service)
-                                    <option value="{{$service->id}}">{{$service->name}}</option>
-                                @endforeach
                             </select>
                         </div>
                         <div class="mb-4">
                             <label class="form-label" for="add-income-category">Category</label>
                             <select id="add-income-category" class="form-select" name="category_id">
-                                <option value="basic">Select Category</option>
-                                @foreach($categories as $category)
-                                    <option value="{{$category->id}}">{{$category->value}}</option>
-                                @endforeach
+                                <option value="">Select Category</option>
                             </select>
                         </div>
+                        {{--<div class="mb-4">--}}
+                            {{--<label class="form-label" for="add-income-station-service">Service</label>--}}
+                            {{--<select id="add-income-station-service" class="form-select" name="service_id">--}}
+                                {{--<option value="">Select Service</option>--}}
+                                {{--@foreach($services as $service)--}}
+                                    {{--<option value="{{$service->id}}">{{$service->name}}</option>--}}
+                                {{--@endforeach--}}
+                            {{--</select>--}}
+                        {{--</div>--}}
+                        {{--<div class="mb-4">--}}
+                            {{--<label class="form-label" for="add-income-category">Category</label>--}}
+                            {{--<select id="add-income-category" class="form-select" name="category_id">--}}
+                                {{--<option value="basic">Select Category</option>--}}
+                                {{--@foreach($categories as $category)--}}
+                                    {{--<option value="{{$category->id}}">{{$category->value}}</option>--}}
+                                {{--@endforeach--}}
+                            {{--</select>--}}
+                        {{--</div>--}}
                         <div class="mb-3">
                             <label class="form-label" for="add-income-amount">Amount</label>
                             <input
@@ -189,10 +202,10 @@
                 const action = $(this).data('action_type');
 
                 var btnTitle = (action === 'restore') ? "Sure to Proceed?" : "Are you sure?";
-                var btnText = (action === 'restore') ? "Please proceed to restore deleted data!" : "This Income won't be used in any case!";
-                var confirmBtnText = (action === 'restore') ? "Yes, restore it!" : "Yes, delete it!";
-                var SuccessTitle = (action === 'restore') ? "Restore!" : "Deleted!";
-                var SuccessText = (action === 'restore') ? "The Data has been restored.!" : "The Income has been deleted!";
+                var btnText = (action === 'restore') ? "Please proceed to Activate Suspended data!" : "This Income won't be used in any case!";
+                var confirmBtnText = (action === 'restore') ? "Yes, Activate it!" : "Yes, Suspend it!";
+                var SuccessTitle = (action === 'restore') ? "Activate!" : "Suspended!";
+                var SuccessText = (action === 'restore') ? "The Data has been Activated.!" : "The Income has been Suspended!";
 
                 Swal.fire({
                     title: btnTitle,
@@ -232,6 +245,47 @@
                     }
                 });
 
+            });
+        </script>
+
+        <script>
+            // Populate services based on selected station
+            $('#add-income-station').on('change', function() {
+                var stationId = $(this).val();
+                if (stationId) {
+                    $.ajax({
+                        url: '{{url("/")}}/get-services/' + stationId,
+                        type: 'GET',
+                        success: function(data) {
+                            var serviceDropdown = $('#add-income-station-service');
+                            serviceDropdown.empty();
+                            serviceDropdown.append('<option value="">Select Service</option>');
+                            $.each(data, function(index, service) {
+                                serviceDropdown.append('<option value="' + service.id + '">' + service.name + '</option>');
+                            });
+                        }
+                    });
+                }
+            });
+
+            // Populate categories based on selected service
+            $('#add-income-station-service').on('change', function() {
+                var serviceId = $(this).val();
+                var category = 'income_category';
+                if (serviceId) {
+                    $.ajax({
+                        url: '{{url("/")}}/get-categories/' + category+ '/' +serviceId,
+                        type: 'GET',
+                        success: function(data) {
+                            var categoryDropdown = $('#add-income-category');
+                            categoryDropdown.empty();
+                            categoryDropdown.append('<option value="">Select Category</option>');
+                            $.each(data, function(index, category) {
+                                categoryDropdown.append('<option value="' + category.id + '">' + category.value + '</option>');
+                            });
+                        }
+                    });
+                }
             });
         </script>
 

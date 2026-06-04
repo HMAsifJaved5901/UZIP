@@ -9,16 +9,15 @@
                 </div>
             </div>
             <div class="card-datatable table-responsive">
-                <table class="datatables-expense table border-top">
-                    <thead>
+                <table class="datatables-expense table border-top custom-table-design">
+                    <thead class="bg-custom-black">
                     <tr>
                         <th></th>
-                        <th>Date</th>
                         <th>Station</th>
-                        <th>Service</th>
+                        <th>Date</th>
+                        {{--<th>Service</th>--}}
                         <th>Category</th>
                         <th>Amount</th>
-                        <th>Description</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -27,7 +26,8 @@
             </div>
             <!-- Offcanvas to add new expense -->
             <div
-                    class="offcanvas offcanvas-end"
+                    {{--class="offcanvas offcanvas-end"--}}
+                    class="offcanvas custom-centered-modal"
                     tabindex="-1"
                     id="offcanvasAddExpense"
                     aria-labelledby="offcanvasAddExpenseLabel"
@@ -66,23 +66,45 @@
                             </select>
                         </div>
                         <div class="mb-4">
-                            <label class="form-label" for="add-expense-service-station">Service</label>
-                            <select id="add-expense-service-station" class="form-select" name="service_id">
-                                <option value="basic">Select Service</option>
-                                @foreach($services as $service)
-                                    <option value="{{$service->id}}">{{$service->name}}</option>
-                                @endforeach
+                            <label class="form-label" for="add-expense-station-service">Service</label>
+                            <select id="add-expense-station-service" class="form-select" name="service_id">
+                                <option value="0">Select Service</option>
                             </select>
                         </div>
-
                         <div class="mb-4">
                             <label class="form-label" for="add-expense-category">Category</label>
                             <select id="add-expense-category" class="form-select" name="category_id">
-                                <option value="basic">Select Category</option>
-                                @foreach($categories as $category)
-                                    <option value="{{$category->id}}">{{$category->value}}</option>
-                                @endforeach
+                                <option value="0">Select Category</option>
                             </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="add-cheque-no">Cheque No</label>
+                            <input
+                                    type="text"
+                                    class="form-control"
+                                    id="add-cheque-no"
+                                    placeholder="Cheque No"
+                                    name="cheque_no"
+                                    aria-label="cheque_no"
+                                    step="0.01"
+                            />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="add-exp-si-uni">Quantity/Unit</label>
+                            <div class="input-group">
+                            <span class="input-group-text">
+                                <input type="text" class="form-control" placeholder="Value" id="add-category-exp_quantity"
+                                       name="exp_quantity" aria-label="Expense Quantity">
+                            </span>
+                                <select id="add-exp-si-unit" class="form-select" name="exp_si_unit">
+                                    <option value="ton">ton</option>
+                                    <option value="lb">lb</option>
+                                    <option value="gal">gal</option>
+                                    <option value="bu">bu</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="add-expense-amount">Amount</label>
@@ -164,11 +186,18 @@
                                 // Populate the form fields
                                 $('#expense_id').val(expense.id);
                                 $('#add-expense-date').val(expense.expense_date);
-                                $('#add-expense-station').val(expense.station_id);
-                                $('#add-expense-service-station').val(expense.service_id);
-                                $('#add-expense-category').val(expense.category_id);
+                                $('#add-expense-station').val(expense.station_id).trigger('change');
                                 $('#add-expense-amount').val(expense.amount);
-                                $('#add-expense-description').val(expense.description);
+                                $('#add-category-exp_quantity').val(expense.exp_quantity);
+                                $('#add-exp-si-unit').val(expense.exp_si_unit);
+
+                                // Fetch services and set service
+                                populateServices(expense.station_id,expense.service_id, function () {
+                                    $('#add-expense-station-service').val(expense.service_id).trigger('change');
+                                    populateCategories(expense.service_id,expense.category_id, function () {
+                                        $('#add-expense-category').val(expense.category_id);
+                                    });
+                                });
                             }
                         },
                         error: function (xhr) {
@@ -190,10 +219,10 @@
                 const action = $(this).data('action_type');
 
                 var btnTitle = (action === 'restore') ? "Sure to Proceed?" : "Are you sure?";
-                var btnText = (action === 'restore') ? "Please proceed to restore deleted data!" : "This Expense won't be used in any case!";
-                var confirmBtnText = (action === 'restore') ? "Yes, restore it!" : "Yes, delete it!";
-                var SuccessTitle = (action === 'restore') ? "Restore!" : "Deleted!";
-                var SuccessText = (action === 'restore') ? "The Data has been restored.!" : "The Expense has been deleted!";
+                var btnText = (action === 'restore') ? "Please proceed to Activate Suspended data!" : "This Expense won't be used in any case!";
+                var confirmBtnText = (action === 'restore') ? "Yes, Activate it!" : "Yes, Suspend it!";
+                var SuccessTitle = (action === 'restore') ? "Activate!" : "Suspended!";
+                var SuccessText = (action === 'restore') ? "The Data has been Activated.!" : "The Expense has been Suspended!";
 
                 Swal.fire({
                     title: btnTitle,
@@ -234,6 +263,78 @@
                 });
 
             });
+        </script>
+
+        <script>
+            // On station selection, fetch services
+            $('#add-expense-station').on('change', function () {
+                var stationId = $(this).val();
+
+                if (stationId) {
+                    populateServices(stationId,0); // Fetch services for the selected station
+                } else {
+                    $('#add-expense-station-service').empty().append('<option value="0">Select Service</option>');
+                    $('#add-expense-category').empty().append('<option value="0">Select Category</option>');
+                }
+            });
+
+            // On service selection, fetch categories
+            $('#add-expense-station-service').on('change', function () {
+                var serviceId = $(this).val();
+
+                if (serviceId) {
+                    populateCategories(serviceId,0); // Fetch categories for the selected service
+                } else {
+                    $('#add-expense-category').empty().append('<option value="0">Select Category</option>');
+                }
+            });
+
+            // Populate services dynamically
+            function populateServices(stationId, selectedServiceId, callback) {
+                $.ajax({
+                    url: '{{url("/")}}/get-services/' + stationId,
+                    type: 'GET',
+                    success: function (data) {
+                        var serviceDropdown = $('#add-expense-station-service');
+                        serviceDropdown.empty();
+                        serviceDropdown.append('<option value="0">Select Service</option>');
+                        $.each(data, function (index, service) {
+                            serviceDropdown.append('<option value="' + service.id + '">' + service.name + '</option>');
+                        });
+
+                        // Set the selected service ID if provided
+                        if (selectedServiceId) {
+                            serviceDropdown.val(selectedServiceId).trigger('change');
+                        }
+
+                        if (typeof callback === 'function') {
+                            callback(); // Trigger callback after services are loaded
+                        }
+                    }
+                });
+            }
+
+            // Populate categories dynamically
+            function populateCategories(serviceId, selectedCategoryId) {
+                var category = 'expense_category';
+                $.ajax({
+                    url: '{{url("/")}}/get-categories/' + category + '/' + serviceId,
+                    type: 'GET',
+                    success: function (data) {
+                        var categoryDropdown = $('#add-expense-category');
+                        categoryDropdown.empty();
+                        categoryDropdown.append('<option value="0">Select Category</option>');
+                        $.each(data, function (index, category) {
+                            categoryDropdown.append('<option value="' + category.id + '">' + category.value + '</option>');
+                        });
+
+                        // Set the selected service ID if provided
+                        if (selectedCategoryId) {
+                            categoryDropdown.val(selectedCategoryId).trigger('change');
+                        }
+                    }
+                });
+            }
         </script>
 
     </x-slot>

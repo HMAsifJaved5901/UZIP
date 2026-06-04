@@ -4,6 +4,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 /**
    @property varchar $name name
+@property varchar $scode scode
 @property varchar $description description
 @property int $category_id category id
 @property int $is_active is active
@@ -24,6 +25,7 @@ class Service extends Model
     * Mass assignable columns
     */
     protected $fillable=['name',
+'scode',
 'description',
 'category_id',
 'is_active',
@@ -34,7 +36,19 @@ class Service extends Model
     */
     protected $dates=[];
 
+    public function stations()
+    {
+        return $this->belongsToMany(Station::class, 'station_services')
+            ->withPivot('is_active', 'created_at', 'updated_at');
+    }
 
+    public function lookupValues()
+    {
+        return $this->hasMany(LookupValue::class, 'reference_value')
+            ->where('reference_type', 'service');
+    }
 
-
+    public function serviceModels(){
+        return $this->hasMany(ServiceModel::class);
+    }
 }

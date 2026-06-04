@@ -2,19 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ExpenseImage;
 use App\Models\LookupValue;
+use App\Models\RejectedTransactionStats;
 use App\Models\Service;
 use App\Models\Station;
+use App\Models\TransactionAdjustment;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Expense;
-use App\Http\Requests\Expense\Index;
-use App\Http\Requests\Expense\Show;
-use App\Http\Requests\Expense\Create;
-use App\Http\Requests\Expense\Store;
-use App\Http\Requests\Expense\Edit;
-use App\Http\Requests\Expense\Update;
-use App\Http\Requests\Expense\Destroy;
+use Illuminate\Support\Facades\DB;
 
 
 /**
@@ -27,10 +25,10 @@ class ExpenseController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @param  Index $request
+     * @param  Request $request
      * @return \Illuminate\Http\Response
      */
-    public function index(Index $request)
+    public function index(Request $request)
     {
         $categories = LookupValue::select(['id', 'value'])->where('type', 'expense_category')->get();
         $stations = Station::select(['id', 'name'])->where('is_deleted', 0)->where('is_active', 1)->get();
@@ -43,23 +41,32 @@ class ExpenseController extends Controller
             ]);
     }
 
-    public function expenseIndex(Request $request)
+    public function dataTableList(Request $request)
     {
-        $expenseModel = Expense::join('stations','stations.id','=','expense.station_id')
-            ->join('services','services.id','=','expense.service_id')
-            ->join('lookup_values','lookup_values.id','=','expense.category_id')
-            ->select('expense.*','stations.name as station_name','services.name as service_name','lookup_values.value as category_name')
-            ->where('lookup_values.type','expense_category')
+        $query = Expense::leftJoin('stations', 'stations.id', '=', 'expense.station_id')
+            ->leftJoin('services', 'services.id', '=', 'expense.service_id')
+            ->leftJoin('lookup_values', 'lookup_values.id', '=', 'expense.category_id')
+            ->select(
+                'expense.*',
+                DB::raw("IFNULL(stations.name, 'N/A') as station_name"),
+                DB::raw("IFNULL(services.name, 'N/A') as service_name"),
+                DB::raw("IFNULL(lookup_values.value, 'N/A') as category_name")
+            )
+            ->where(function ($query) {
+                $query->where('lookup_values.type', 'expense_category')
+                    ->orWhereNull('lookup_values.type');
+            })
             ->get();
-        $formattedModel = $expenseModel->map(function ($model) {
+        $formattedModel = $query->map(function ($model) {
             return [
                 'id' => $model->id,
-                'expense_date' => $model->expense_date,
+                'expense_date' => $model->expense_date ? Carbon::parse($model->expense_date)->format('F jS, Y') : 'NA',
                 'station_name' => $model->station_name,
                 'service_name' => $model->service_name,
                 'category_name' => $model->category_name,
                 'amount' => $model->amount,
                 'description' => $model->description,
+                'status' => $model->status,
                 'is_deleted' => $model->is_deleted
             ];
         });
@@ -67,7 +74,7 @@ class ExpenseController extends Controller
         return response()->json(['data' => $formattedModel]);
     }
 
-    public function getExpenseById($id)
+    public function getById($id)
     {
         $model = Expense::where('id', $id)->first();
         return response()->json(['data' => $model]);
@@ -76,21 +83,43 @@ class ExpenseController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  Request $request
+     * @param  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request)
+    public function show($id)
     {
-        $model = Expense::join('stations','stations.id','=','expense.station_id')
-            ->join('services','services.id','=','expense.service_id')
-            ->join('lookup_values','lookup_values.id','=','expense.category_id')
-            ->select('expense.*','stations.name as station_name','services.name as service_name','lookup_values.value as category_name')
-            ->where('lookup_values.type','expense_category')
-            ->where('expense.id',$request->id)
+        $model = Expense::leftJoin('stations', 'stations.id', '=', 'expense.station_id')
+            ->leftJoin('services', 'services.id', '=', 'expense.service_id')
+            ->leftJoin('lookup_values', 'lookup_values.id', '=', 'expense.category_id')
+            ->select(
+                'expense.*',
+                DB::raw("IFNULL(stations.name, 'N/A') as station_name"),
+                DB::raw("IFNULL(services.name, 'N/A') as service_name"),
+                DB::raw("IFNULL(lookup_values.value, 'N/A') as category_name")
+            )
+            ->where(function ($model) {
+                $model->where('lookup_values.type', 'expense_category')
+                    ->orWhereNull('lookup_values.type');
+            })
+            ->where('expense.id', $id)
             ->first();
+
+        if (!$model) {
+            return back()->with('error', 'Record not found.');
+        }
+
+        $adjustmentAmount = 0;
+        if ($model->transaction_adjustment_id) {
+            $adjustment = TransactionAdjustment::find($model->transaction_adjustment_id);
+            $adjustmentAmount = $adjustment ? $adjustment->delta_amount : 0;
+        }
+
+        $imagesModel = ExpenseImage::where('expense_id',$id)->where('deleted',0)->get();
 
         return view('cards.expense', [
             'record' => $model,
+            'images' => $imagesModel,
+            'adjustmentAmount' => $adjustmentAmount
         ]);
 
     }
@@ -107,9 +136,12 @@ class ExpenseController extends Controller
         $request->validate([
             'expense_date' => 'required|date',
             'station_id' => 'required|integer',
-            'service_id' => 'integer',
-            'category_id' => 'required|integer',
+            'service_id' => 'nullable|integer',
+            'category_id' => 'nullable|integer',
             'amount' => 'required|numeric|min:0',
+            'exp_si_unit' => 'nullable|string',
+            'exp_quantity' => 'nullable|string',
+            'cheque_no' => 'nullable|string',
         ]);
 
         // Check if there is a file uploaded
@@ -145,7 +177,6 @@ class ExpenseController extends Controller
             // Save the model and return the appropriate response
             if ($model->save()) {
                 session()->flash('app_message', 'Expense ' . ($request->id ? 'updated' : 'saved') . ' successfully');
-                return redirect()->route('expense.index');
             } else {
                 session()->flash('app_message', 'Something went wrong while saving Expense');
             }
@@ -180,6 +211,83 @@ class ExpenseController extends Controller
         $model->is_deleted = $deleted;
         $model->save();
 
-        return response()->json(['message' => 'User '.$message.' successfully.', 200]);
+        return response()->json(['message' => 'Expense '.$message.' successfully.', 200]);
+    }
+
+    public function approve($id)
+    {
+        $sale = Expense::findOrFail($id);
+        $sale->status = 1;
+        $sale->save();
+
+        if($sale->cih_source == 'cash_register'){
+            $route = 'web.station.cih.register.view';
+        }else{
+            $route = 'web.station.cih.view';
+        }
+
+        if(isset($sale->cash_register_id) && $sale->cash_register_id!=null){
+            return redirect()->route($route, ['id' => $sale->cash_register_id])
+                ->with('success', 'Transaction approved successfully.');
+        }else{
+            return back()->with('success', 'Transaction approved successfully.');
+        }
+    }
+
+    public function pending($id)
+    {
+        $sale = Expense::findOrFail($id);
+        $sale->status = 0;
+        $sale->save();
+
+        if($sale->cih_source == 'cash_register'){
+            $route = 'web.station.cih.register.view';
+        }else{
+            $route = 'web.station.cih.view';
+        }
+
+        if(isset($sale->cash_register_id) && $sale->cash_register_id!=null){
+            return redirect()->route($route, ['id' => $sale->cash_register_id])
+                ->with('success', 'Transaction reversed successfully.');
+        }else{
+            return back()->with('success', 'Transaction reversed successfully.');
+        }
+    }
+
+    public function reject(Request $request, $id)
+    {
+        try {
+            $sale = Expense::findOrFail($id);
+
+            DB::transaction(function () use ($id, $request, $sale) {
+                $sale->status = 2;
+                $sale->rejected_reason = $request->rejected_reason;
+                $sale->save();
+
+                RejectedTransactionStats::recordRejection(
+                    $sale->station_id,
+                    'Expense',
+                    now()->format('Y-m'),
+                    '8888'
+                );
+            });
+
+            if($sale->cih_source == 'cash_register'){
+                $route = 'web.station.cih.register.view';
+            }else{
+                $route = 'web.station.cih.view';
+            }
+
+            if(isset($sale->cash_register_id) && $sale->cash_register_id!=null){
+                return redirect()->route($route, ['id' => $sale->cash_register_id])
+                    ->with('success', 'Transaction rejected successfully.');
+            }else{
+                return back()->with('success', 'Transaction rejected successfully.');
+            }
+
+        } catch (\Exception $e) {
+            // If anything fails inside the closure, the transaction rolls back automatically
+            return back()->with('error', 'Failed to reject transaction: ' . $e->getMessage());
+        }
     }
 }
